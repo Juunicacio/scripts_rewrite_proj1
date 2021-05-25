@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 import pyproj as pj # for reliable gps
-# or from pyproj import Geod (and remove the pj when executing the functionality)
 import numpy as np # for reliable gps
 from collections import Counter # for reliable gps
 import datetime as dt # for reliable gps
@@ -102,10 +101,8 @@ class TurtleData:
             return cvsName 
 
     @staticmethod
-    def calculateDistance(geodRef, lon1, lat1, lon2, lat2):
-        # # compute forward and back azimuths, plus distance
-        az12,az21,dist = geodRef.inv(lon1, lat1, lon2, lat2) #Take the second row and the first row on the count. it shoul give 3 values, but I only need the dist.
-        # f"{az12:.3f} {az21:.3f} {dist:.3f}"        
+    def calculateDistance(geodRef, lat1, lon1, lat2, lon2):
+        v1,v2,dist = geodRef.inv(lat1,lon1,lat2,lon2) #Take the second row and the first row on the count. it shoul give 3 values, but I only need the dist.
         return dist #Put the dist inside the distances variable once empty.
     
     @staticmethod
@@ -124,7 +121,6 @@ class TurtleData:
         self.allGpsDfCsvName = ""
         #self.allGpsDf2019 = pd.DataFrame()
         self.allCleanedGpsDf = pd.DataFrame()
-        self.allCleanedGpsDfCsvName = ""
         self.reliableGpsDf = pd.DataFrame()
     #def addElement(self, row, header):
         #self.__dict__= dict(zip(header, row))
@@ -189,8 +185,20 @@ class TurtleData:
         # separing date from time in that column
         lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
         #print(lastEntry)
-        # assign the Name in the Class Variable
-        self.allGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "allGpsDf", self.turtleTag)        
+        for value in enumerate(lastEntry):
+            #print(value[1][0])
+            lastDate = value[1][0]
+            date = dt.datetime.strptime(lastDate, "%Y.%m.%d")
+            stringDate = date.strftime("%Y") + "_" + date.strftime("%b")
+            print(f"The Last Entry in the Dataframe for {self.turtleTag} is from: ")
+            print(stringDate)
+            # Give the CSV a Name based on this values above
+            # name = allGpsDf_tag_xxxxx_until_lastdate
+            cvsName = "allGpsDf" + "_Tag_" + self.turtleTag + "_" + stringDate +".csv"
+            print(f"The Name of the allGpsDf CSV for the turtleData {self.turtleTag} is: ")
+            print(cvsName)
+            print('--------------')
+            self.allGpsDfCsvName = cvsName
     
     def saveAllGpsData(self, pathToFilePlusCsvName):
         self.allGpsDf.to_csv(pathToFilePlusCsvName, index=False)
@@ -248,14 +256,7 @@ class TurtleData:
         print(duplicateRowsTemporaryDf)
         print(duplicateRowsTemporaryDf.iloc[13:19,1])
         print(f"Without duplicated rows, the dataframe has now {len(duplicateRowsTemporaryDf.index)} rows")
-        # Drop same aquisition time that is giving us error in the calculation of distances and speeds
-        duplicateRowsTemporaryDf = duplicateRowsTemporaryDf.drop_duplicates(['Acquisition Time'], keep='first')
-        print(duplicateRowsTemporaryDf)
-        print(duplicateRowsTemporaryDf.iloc[13:19,1])
-        print("The lines where we had the same acquisition time")
-        print(duplicateRowsTemporaryDf.iloc[23:29,1])
-        print(f"Without duplicated acquisition times, the dataframe has now {len(duplicateRowsTemporaryDf.index)} rows")
-        print("The df without duplicated rows and Without duplicated acquisition times is the duplicateRowsTemporaryDf")
+        print("The df without duplicated rows is the duplicateRowsTemporaryDf")
         print('--------------')
         print("Saving this temporary df into the allCleanedGpsDf...")
         self.allCleanedGpsDf = self.allCleanedGpsDf.append(duplicateRowsTemporaryDf, ignore_index=True)
@@ -271,166 +272,104 @@ class TurtleData:
         # separing date from time in that column
         lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
         #print(lastEntry)
-        # assign the Name in the Class Variable
         self.allCleanedGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "allCleanedGpsDf", self.turtleTag)
-    
-    def saveAllCleanedGpsData(self, pathToFilePlusCsvName):
-        self.allCleanedGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
-    def giveReliableGpsDf(self):
-        '''
-        Remove GPS Errors by Angular velocity/Rotational speed 
-        (degree per second)
-        Geod Object for Calculations is used as objec to calculate 
-        distances between points expressed in lat/lon (in degree)
-        Choosing a Reference Ellipsoid - distance in degree more 
-        accurate than a spherical method
-        '''
-        removingGpsErrorsTemporaryDf = self.allCleanedGpsDf.copy()
-        #print(gpsErrorsTemporaryDf)
-        wgs84_geod = Geod(ellps='WGS84')
-        ## Converting data to a NumPy array.        
-        latitudes = removingGpsErrorsTemporaryDf[['GPS Latitude']].to_numpy() 
-        longitudes = removingGpsErrorsTemporaryDf[['GPS Longitude']].to_numpy()
-        acquisitionTimes = removingGpsErrorsTemporaryDf[['Acquisition Time']].to_numpy()
         
-        #latitudes = removingGpsErrorsTemporaryDf['GPS Latitude'].reset_index().values
-        #longitudes = removingGpsErrorsTemporaryDf['GPS Longitude'].reset_index().values
-        ##acquisitionTimes = removingGpsErrorsTemporaryDf[['Acquisition Time']].reset_index().values
-        #acquisitionTimes = removingGpsErrorsTemporaryDf[['Acquisition Time']].to_numpy()        
-        
-        #print(latitudes.dtype)
-        #print(longitudes.dtype)
-        #print(acquisitionTimes.dtype)
-        
-        #print(latitudes)
-        #print(longitudes)
-        #print(acquisitionTimes)
 
-        distances = []
-        tripTimes = []
-        speeds = []
-        remSpeeds = []
-        pointsToRemove = []        
         
-        distances.append(0)
-        tripTimes.append(0)
-        speeds.append(0)
-
-        i=1
-        while i < (len(latitudes)):
-            foundS = False
-            previous = i-1
-            D = 0
-            S = 100
-            while (S > 1.111) and (i < len(latitudes)):
-                D = TurtleData.calculateDistance(wgs84_geod, longitudes[previous], latitudes[previous], longitudes[i], latitudes[i])
-                t1 = TurtleData.convertUnixTimeFromString(acquisitionTimes[previous,0])
-                t2 = TurtleData.convertUnixTimeFromString(acquisitionTimes[i,0])
-                S = TurtleData.calculateSpeed(D,t1,t2)
-                #print(f" D = {D}")
-                #print('dist: %.3f' % D)
-                #print(f" S = {S}")
-                #print('S: %.3f' % S)
-                if(S > 1.111):
-                    remSpeeds.append(S)
-                    #print(f"remSpeeds List: {remSpeeds}")                    
-                    pointsToRemove.append(acquisitionTimes[i,0])
-                    #print(pointsToRemove)                    
-                    i+=1
-                else:
-                    foundS = True
-            if(foundS):
-                distances.append(D)
-                tripTimes.append(t2-t1)
-                speeds.append(S)
-            i+=1
-        print(self.turtleTag)
-        print("Length of pointsToRemove List: ")
-        print(len(pointsToRemove))
-        print(f"remSpeeds List: {remSpeeds}")
-        #---------
-        print('--------------')        
-        print(pointsToRemove)
         
-        print('BEFORE DROP - removingGpsErrorsTemporaryDf')
-        print(len(removingGpsErrorsTemporaryDf))
         
-        cond = removingGpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)        
-        removingGpsErrorsTemporaryDf.drop(removingGpsErrorsTemporaryDf[cond].index, inplace = True)
-        print('AFTER DROP - removingGpsErrorsTemporaryDf')
-        print(len(removingGpsErrorsTemporaryDf))
-         
-        removingGpsErrorsTemporaryDf['Distance (m)'] = distances        
-        removingGpsErrorsTemporaryDf['Time (s)'] = tripTimes
-        removingGpsErrorsTemporaryDf['Speed m/s'] = speeds
-        removingGpsErrorsTemporaryDf['Time (h)'] = pd.to_timedelta(removingGpsErrorsTemporaryDf['Time (s)'], unit='s') # Add a Column with the Time passed from on Point to another in hours
-        print('BEFORE CHANGES - FROM INT TO FLOAT')
-        print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
+
+            
+
+    # def giveReliableGpsDf(self):
+
+    #     # BEFORE CALCULATE THIS, WE NEED TO REMOVE THE DUPLICATES ROW
+    #     '''
+    #     Remove GPS Errors by Angular velocity/Rotational speed 
+    #     (degree per second)
+    #     Geod Object for Calculations is used as objec to calculate 
+    #     distances between points expressed in lat/lon (in degree)
+    #     Choosing a Reference Ellipsoid - distance in degree more 
+    #     accurate than a spherical method	
+    #     '''
+    #     self.reliableGpsDf = self.allGpsDf.copy()
+    #     wgs84_geod = pj.Geod(ellps='WGS84')
+    #     # Converting data to a NumPy array.
+    #     latitudes = self.reliableGpsDf[['GPS Latitude']].to_numpy() 
+    #     longitudes = self.reliableGpsDf[['GPS Longitude']].to_numpy()
+    #     acquisitionTimes = self.reliableGpsDf[['Acquisition Time']].to_numpy()
+
+    #     distances = []
+    #     tripTimes = []
+    #     speeds = []
+    #     pointsToRemove = []
+    #     remSpeeds = []
         
-        # Removing Square brackets From values in the 'Distance (m)' and 'Speed m/s' Columns
-        #remove brackets of the values in Columns        
-        removingGpsErrorsTemporaryDf = removingGpsErrorsTemporaryDf.astype({"Distance (m)":'float', "Speed m/s":'float'}) 
-        #removingGpsErrorsTemporaryDf['Distance (m)'] = removingGpsErrorsTemporaryDf['Distance (m)'].str[0] #remove the brackets of the values in the column
-        #removingGpsErrorsTemporaryDf['Speed m/s'] = removingGpsErrorsTemporaryDf['Speed m/s'].str[0] #remove the brackets of the values in the column	        
-        print('AFTER CHANGES - FROM INT TO FLOAT')
-        print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
+    #     distances.append(0)
+    #     tripTimes.append(0)
+    #     speeds.append(0)
+
+    #     i=1
+    #     while i < (len(latitudes)):
+    #         foundS = False
+    #         previous = i-1
+    #         D = 0
+    #         S = 100		
+    #         while (S > 1.111) and (i < len(latitudes)):
+    #             D = TurtleData.calculateDistance(wgs84_geod,latitudes[previous],longitudes[previous],latitudes[i],longitudes[i])
+    #             t1 = TurtleData.convertUnixTimeFromString(acquisitionTimes[previous,0])
+    #             t2 = TurtleData.convertUnixTimeFromString(acquisitionTimes[i,0])
+    #             S = TurtleData.calculateSpeed(D,t1,t2)
+    #             if(S > 1.111):
+    #                 remSpeeds.append(S)
+    #                 pointsToRemove.append(acquisitionTimes[i,0])
+    #                 i+=1
+    #             else:
+    #                 foundS = True
+    #         if(foundS):
+    #             distances.append(D)
+    #             tripTimes.append(t2-t1)
+    #             speeds.append(S)
+    #         i+=1
+    #     #---------	
+    #     # Saving Removed Points in another dataframe and dropping those out from this one
+    #     removedPointsRow = self.reliableGpsDf[self.reliableGpsDf['Acquisition Time'].isin(pointsToRemove)]
+    #     removedPointsRow.loc[:,'Speeds > 1,11111 m/s'] = remSpeeds
+    #     # reseting index
+    #     removedPointsRow.reset_index(drop=True, inplace=True) 
+    #     removedGPSPoints = removedPointsRow.index + 1 
+    #     # Creating a Column for ID Removed Track Points on the Left
+    #     removedPointsRow.insert(0, 'Qty', removedGPSPoints) 
+    #     # Saving the amount of removed points data
+    #     qtyremovedGPSpointsSept = len(removedPointsRow.index) 
+    #     print(f'QTY OF REMOVED POINTS: {qtyremovedGPSpointsSept}')
         
-        print("With new columns")
-        print(removingGpsErrorsTemporaryDf)
-        print(removingGpsErrorsTemporaryDf.dtypes)        
-        print('--------------')
-
-
-        # Saving Removed Points in another dataframe (removedPointsRowDf) and dropping those out from the gpsErrorsTemporaryDf
-        #self.allGpsDf.drop(self.allGpsDf[~self.allGpsDf['GPS Latitude'].notna()].index, inplace=True)
-        #self.allGpsDf.reset_index(drop=True, inplace=True) # reset index
-        removedPointsRowDf = gpsErrorsTemporaryDf[gpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)]
-        removedPointsRowDf.loc[:,'Speeds > 1,11111 m/s'] = remSpeeds
-        # reseting index
-        removedPointsRowDf.reset_index(drop=True, inplace=True) 
-        removedGPSPoints = removedPointsRowDf.index + 1 
-        # Creating a Column for ID Removed Track Points on the Left
-        removedPointsRowDf.insert(0, 'Removed GPS by Speed', removedGPSPoints) 
-        # Saving the amount of removed points data
-        qtyremovedGPSpointsSept = len(removedPointsRowDf.index) 
-        print(f'QTY OF REMOVED POINTS: {qtyremovedGPSpointsSept}')        
-        # # Count Occurrence of a value in 'GPS Fix Attempt' Column
-        # cntOccurrFixAttemptRemovedPoints = Counter(removedPointsRowDf['GPS Fix Attempt'])
-        # print('Qty Fix Attempt Of Removed Points:') 
-        # print(cntOccurrFixAttemptRemovedPoints)
-        # print('-----------------------')        
-        # # EXPORTING REMOVED POINTS DATA
-        # #removedPointsRowDf.to_csv('Removed_Points_GPS_Data_Tag_333A_Sept.csv', index=False) # Calling DataFrame constructor on list
-
-        # # LATER ON, SAVE REMOVED DATA:
-        # #-2019 DATA REMOVED FROM ALLGPSDF
-        # #-DUPLICATED DATA REMOVED FROM ALLGPSDF
-        # #-REMOVED GPS TRACK POINTS FROM THE ALLCLEANEDGPSDF
-        # #-----------------------------------------------------------
+    #     # Count Occurrence of a value in 'GPS Fix Attempt' Column
+    #     cntOccurrFixAttemptRemovedPoints = Counter(removedPointsRow['GPS Fix Attempt'])
+    #     print('Qty Fix Attempt Of Removed Points:') 
+    #     print(cntOccurrFixAttemptRemovedPoints)
+    #     print('-----------------------')
         
-        #gpsErrorsTemporaryDf.drop(gpsErrorsTemporaryDf[gpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)].index, inplace=True)
-
-
+    #     # EXPORTING REMOVED POINTS DATA
+    #     #removedPointsRow.to_csv('Removed_Points_GPS_Data_Tag_333A_Sept.csv', index=False) # Calling DataFrame constructor on list	
+        
+    #     self.reliableGpsDf.drop(self.reliableGpsDf[self.reliableGpsDf['Acquisition Time'].isin(pointsToRemove)].index, inplace=True)	
         
     #     #-----------------------------------------------------------
     #     #Complete the new columns and save only reliable GPS points excluded through speed
         
-    #     gpsErrorsTemporaryDf.reset_index(drop=True, inplace=True) # reset index
-    #     routePoints = gpsErrorsTemporaryDf.index + 1 
-    #     gpsErrorsTemporaryDf.insert(0, 'Tracked Points', routePoints) # Create a ID Column on the Left for the Tracked Points 
+    #     self.reliableGpsDf.reset_index(drop=True, inplace=True) # reset index
+    #     routePoints = self.reliableGpsDf.index + 1 
+    #     self.reliableGpsDf.insert(0, 'Tracked Points', routePoints) # Create a ID Column on the Left for the Tracked Points 
                 
-    #     gpsErrorsTemporaryDf.drop(['ID GPS Points'], axis=1, inplace=True)
+    #     self.reliableGpsDf.drop(['ID GPS Points'], axis=1, inplace=True)
         
     #     # Add the list values as New Columns of the DataFrame
-    #     gpsErrorsTemporaryDf['Length (m)'] = distances
-    #     gpsErrorsTemporaryDf['Length (m)'] = gpsErrorsTemporaryDf['Length (m)'].str[0] #remove the brackets of the values in the column
-    #     gpsErrorsTemporaryDf['Time (s)'] = tripTimes
-    #     gpsErrorsTemporaryDf['Speed m/s'] = speeds
-    #     gpsErrorsTemporaryDf['Speed m/s'] = gpsErrorsTemporaryDf['Speed m/s'].str[0] #remove the brackets of the values in the column	
+    #     self.reliableGpsDf['Length (m)'] = distances
+    #     self.reliableGpsDf['Length (m)'] = self.reliableGpsDf['Length (m)'].str[0] #remove the brackets of the values in the column
+    #     self.reliableGpsDf['Time (s)'] = tripTimes
+    #     self.reliableGpsDf['Speed m/s'] = speeds
+    #     self.reliableGpsDf['Speed m/s'] = self.reliableGpsDf['Speed m/s'].str[0] #remove the brackets of the values in the column	
     #     #print(df.dtypes)
-    #     gpsErrorsTemporaryDf['Time (h)'] = pd.to_timedelta(gpsErrorsTemporaryDf['Time (s)'], unit='s') # Add a Column with the Time passed from on Point to another in hours
-
-
-
-#self.reliableGpsDf
+    #     self.reliableGpsDf['Time (h)'] = pd.to_timedelta(self.reliableGpsDf['Time (s)'], unit='s') # Add a Column with the Time passed from on Point to another in hours

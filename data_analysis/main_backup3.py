@@ -29,14 +29,8 @@ def main():
     # deleting duplicate rows and 2019 date
     getAllCleanedGpsDataframes(turtlesData)
 
-    # get name for each ALL CLEANED GPS DF turtleData
-    createAllCleanedGpsDfCsvNameForEachInstance(turtlesData)
-
-    # SAVE THE ALL CLEANED GPS DATAFRAME in the Results Folder
-    checkIfAllCleanedGpsDfHasBeenSaved(turtlesData)
-
     # see dfs of reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
-    getReliableGpsDataframes(turtlesData)
+    #getReliableGpsDataframes(turtlesData)
 
     # Clean Data, filtering 'no GPS Data' from 'GPS Data'
 
