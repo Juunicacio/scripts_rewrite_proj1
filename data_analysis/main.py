@@ -44,6 +44,9 @@ def main():
     # SAVE THE TEMP RELIABLE GPS DATAFRAME WITH NO TAG DATE in the Results Folder
     checkIfTempReliableGpsDfWithNoTagDateHasBeenSaved(turtlesData)
 
+    # 
+    assignTagDayDatetimeToEachInstance(turtlesData)
+
     # Clean Data, filtering 'no GPS Data' from 'GPS Data'
 
 

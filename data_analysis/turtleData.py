@@ -120,6 +120,9 @@ class TurtleData:
 
     def __init__(self, tag):
         self.turtleTag = tag
+        self.tagDate = ""
+        self.tagTime = ""
+        self.tagDatetime = ""
         self.df = pd.DataFrame()
         self.allGpsDf = pd.DataFrame()
         self.allGpsDfCsvName = ""
@@ -429,9 +432,30 @@ class TurtleData:
     
     def saveTempReliableGpsDfWithNoTagDateData(self, pathToFilePlusCsvName):
         self.tempReliableGpsDfWithNoTagDate.to_csv(pathToFilePlusCsvName, index=False)
+    
+    def assignTagTurtleDayDatetime(self, TagDate, TagTime):
+        '''
+        the Date and Time of the turtle's Tag Day
+        '''
+        self.tagDate = TagDate
+        self.tagTime = TagTime
+        self.tagDatetime = self.tagDate + " " + self.tagTime
+    
+    def giveReliableGpsDf(self):
+        '''
+        Get a Reliable Gps Df with only the Data received after
+        '''
+        
+
+
+
 
 
         # -------- until this bit above works, next, works with saving the reliable df
+
+        #add 
+        
+        
 
 
         # Saving Removed Points in another dataframe (removedPointsRowDf) and dropping those out from the gpsErrorsTemporaryDf

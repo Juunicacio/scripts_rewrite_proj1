@@ -19,8 +19,13 @@ DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(DATACLEANINGRESULTS_FOLDER)# ("dat
 #DATACLEANINGRESULTS_FOLDER = "dataCleaningResults"
 #DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
 
-TAG_TURTLE_1 = '710333A'
-TAG_TURTLE_2 = '710348A'
+TAG_TURTLE_1 = '710333a'
+DATE_TAG_TURTLE_1 = '2020.07.09'
+TIME_TAG_TURTLE_1 = '23:00:09'
+
+TAG_TURTLE_2 = '710348a'
+DATE_TAG_TURTLE_2 = '2020.08.12'
+TIME_TAG_TURTLE_2 = '02:00:11'
 
 INITIAL_TAG_DIGITS = '7103'
 
@@ -279,6 +284,30 @@ def checkIfTempReliableGpsDfWithNoTagDateHasBeenSaved(turtlesData):
         # TRY TO DO ONLY ONE FUNCTION FOR ALL,
         # AND ALSO TRY TO MAKE THIS ONE FUNCTION TO WAIT UNTIL THE CLEANING HAS BEEN MADE 
         # TO THEN SAVE THE FIRST THE ALL CLEANED GPS DF AND THEN THE RELIABLE GPS DF
+
+#def appendTurtlePropertiesToDictionary(sample_dict, key, value):
+    #if key not in sample_dict:
+        #sample_dict[key] = value
+    #return sample_dict
+
+def assignTagDayDatetimeToEachInstance(turtlesData):
+    notFoundTurtleTagDatetime = False
+    for turtleData in turtlesData:
+        if turtleData.getTag() == TAG_TURTLE_1:
+            turtleData.assignTagTurtleDayDatetime(DATE_TAG_TURTLE_1, TIME_TAG_TURTLE_1)
+        elif turtleData.getTag() == TAG_TURTLE_2:
+            turtleData.assignTagTurtleDayDatetime(DATE_TAG_TURTLE_2, TIME_TAG_TURTLE_2)
+        else:
+            notFoundTurtleTagDatetime = True
+            print("Attention!")
+            print(f"{turtleData.turtleTag} has not a Tag Datetime yet!")
+        # for obj in Class, print its tagDatetime
+        print("For obj in Class, print its tagDatetime")
+        print(turtleData.tagDatetime)
+    if not notFoundTurtleTagDatetime:
+        print("Tag Datetime for all instances assign!")
+
+def getReliableGpsDataframes(turtlesData):
 
 
             
