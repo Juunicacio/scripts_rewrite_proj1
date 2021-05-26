@@ -1,8 +1,7 @@
 import pandas as pd
 import os
-#import pyproj as pj # for reliable gps
+import pyproj as pj # for reliable gps
 # or from pyproj import Geod (and remove the pj when executing the functionality)
-from pyproj import Geod
 import numpy as np # for reliable gps
 from collections import Counter # for reliable gps
 import datetime as dt # for reliable gps
@@ -97,7 +96,7 @@ class TurtleData:
             # Give the CSV a Name based on this values above
             # name = allGpsDf_tag_xxxxx_until_lastdate
             cvsName = selfDfNameString + "_Tag_" + selfTurtleTag + "_" + stringDate +".csv"
-            print(f"The Name for the {selfDfNameString} CSV for the turtleData {selfTurtleTag} is: ")
+            print(f"The Name of the {selfDfNameString} CSV for the turtleData {selfTurtleTag} is: ")
             print(cvsName)
             print('--------------')
             return cvsName 
@@ -126,10 +125,7 @@ class TurtleData:
         #self.allGpsDf2019 = pd.DataFrame()
         self.allCleanedGpsDf = pd.DataFrame()
         self.allCleanedGpsDfCsvName = ""
-        self.tempReliableGpsDfWithNoTagDate = pd.DataFrame()
-        self.tempReliableGpsDfWithNoTagDateCsvName = "" 
         self.reliableGpsDf = pd.DataFrame()
-        self.reliableGpsDfCsvName = ""
     #def addElement(self, row, header):
         #self.__dict__= dict(zip(header, row))
 
@@ -196,7 +192,7 @@ class TurtleData:
         # assign the Name in the Class Variable
         self.allGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "allGpsDf", self.turtleTag)        
     
-    def saveAllGpsDfData(self, pathToFilePlusCsvName):
+    def saveAllGpsData(self, pathToFilePlusCsvName):
         self.allGpsDf.to_csv(pathToFilePlusCsvName, index=False)
     
     def giveAllCleanedGpsDf(self):
@@ -278,10 +274,10 @@ class TurtleData:
         # assign the Name in the Class Variable
         self.allCleanedGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "allCleanedGpsDf", self.turtleTag)
     
-    def saveAllCleanedGpsDfData(self, pathToFilePlusCsvName):
+    def saveAllCleanedGpsData(self, pathToFilePlusCsvName):
         self.allCleanedGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
-    def giveTempReliableGpsDfWithNoTagDate(self):
+    def giveReliableGpsDf(self):
         '''
         Remove GPS Errors by Angular velocity/Rotational speed 
         (degree per second)
@@ -364,22 +360,6 @@ class TurtleData:
         removingGpsErrorsTemporaryDf.drop(removingGpsErrorsTemporaryDf[cond].index, inplace = True)
         print('AFTER DROP - removingGpsErrorsTemporaryDf')
         print(len(removingGpsErrorsTemporaryDf))
-
-        # LATER TRY TO WORK WITH REMOVING DAYS BEFORE TURTLE TAGGED ---------------------------------------------------
-
-        ## cond2 remove datetime before specific datetime
-        ##df['date'] = pd.to_datetime(df['date'])
-        ##res = df[~(df['date'] < '2018-04-01')]
-        
-        #print("SEE IF DATETIME WORKS")
-        #if self.turtleTag == '710333A':
-            #removingGpsErrorsTemporaryDf['Acquisition Time'] = pd.to_datetime(removingGpsErrorsTemporaryDf['Acquisition Time'])
-            #cond2 = removingGpsErrorsTemporaryDf[(removingGpsErrorsTemporaryDf['Acquisition Time'] < '2020.07.09 23:00:09')] #2020.07.09 23:00:09
-            #print(cond2)
-            #print('--------------')
-            #removingGpsErrorsTemporaryDf.drop(removingGpsErrorsTemporaryDf[cond2].index, inplace = True)
-        
-        # ---------------------------------------------------
          
         removingGpsErrorsTemporaryDf['Distance (m)'] = distances        
         removingGpsErrorsTemporaryDf['Time (s)'] = tripTimes
@@ -396,40 +376,10 @@ class TurtleData:
         print('AFTER CHANGES - FROM INT TO FLOAT')
         print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
         
-        #print("With new columns")
-        #print(removingGpsErrorsTemporaryDf)
-        #print(removingGpsErrorsTemporaryDf.dtypes)        
-        #print('--------------')
-        
-        # Create a ID Column on the Left for the Reliable Tracked Points 
-        speedTrackedPoints = removingGpsErrorsTemporaryDf.index + 1
-        removingGpsErrorsTemporaryDf.insert(0, 'Speed Reliable ID', speedTrackedPoints)
-        
-        #print("With ID column")
-        #print(removingGpsErrorsTemporaryDf)
-        #print(removingGpsErrorsTemporaryDf.dtypes)        
-        #print('--------------')
-        
-        self.tempReliableGpsDfWithNoTagDate = self.tempReliableGpsDfWithNoTagDate.append(removingGpsErrorsTemporaryDf, ignore_index=True)
-        
-        print("Assign the Reliable GPS DF of the objs")
-        print(self.tempReliableGpsDfWithNoTagDate)
-        print(self.tempReliableGpsDfWithNoTagDate.dtypes)        
+        print("With new columns")
+        print(removingGpsErrorsTemporaryDf)
+        print(removingGpsErrorsTemporaryDf.dtypes)        
         print('--------------')
-    
-    def generateTempReliableGpsDfWithNoTagDateCsvName(self):
-        # Last entry:
-        lastEntry = self.tempReliableGpsDfWithNoTagDate['Acquisition Time'].tail(1)
-        #print(lastEntry)
-        # separing date from time in that column
-        lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
-        #print(lastEntry)
-        # assign the Name in the Class Variable
-        self.tempReliableGpsDfWithNoTagDateCsvName = TurtleData.basedNamesForCsv(lastEntry, "tempReliableGpsDfWithNoTagDate", self.turtleTag)
-    
-    def saveTempReliableGpsDfWithNoTagDateData(self, pathToFilePlusCsvName):
-        self.tempReliableGpsDfWithNoTagDate.to_csv(pathToFilePlusCsvName, index=False)
-
 
         # -------- until this bit above works, next, works with saving the reliable df
 

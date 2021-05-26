@@ -35,14 +35,14 @@ def main():
     # SAVE THE ALL CLEANED GPS DATAFRAME in the Results Folder
     checkIfAllCleanedGpsDfHasBeenSaved(turtlesData)
 
-    # see dfs of the Temp reliable gps with no tag date (Remove GPS Errors by Angular velocity/Rotational speed)
-    getTempReliableGpsDfWithNoTagDateDataframes(turtlesData)
+    # see dfs of reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
+    getReliableGpsDataframes(turtlesData)
 
-    # get name for each TEMP RELIABLE GPS DF WITH NO TAG DATE turtleData
-    createTempReliableGpsDfWithNoTagDateCsvNameCsvNameForEachInstance(turtlesData)
+    # get name for each RELIABLE GPS DF turtleData
+    createReliableGpsDfCsvNameForEachInstance(turtlesData)
 
-    # SAVE THE TEMP RELIABLE GPS DATAFRAME WITH NO TAG DATE in the Results Folder
-    checkIfTempReliableGpsDfWithNoTagDateHasBeenSaved(turtlesData)
+    # SAVE THE RELIABLE GPS DATAFRAME in the Results Folder
+    checkIfReliableGpsDfHasBeenSaved(turtlesData)
 
     # Clean Data, filtering 'no GPS Data' from 'GPS Data'
 
