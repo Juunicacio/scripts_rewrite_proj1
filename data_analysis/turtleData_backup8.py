@@ -202,14 +202,6 @@ class TurtleData:
     def saveAllGpsDfData(self, pathToFilePlusCsvName):
         self.allGpsDf.to_csv(pathToFilePlusCsvName, index=False)
     
-    def assignTagTurtleDayDatetime(self, TagDate, TagTime):
-        '''
-        the Date and Time of the turtle's Tag Day
-        '''
-        self.tagDate = TagDate
-        self.tagTime = TagTime
-        self.tagDatetime = self.tagDate + " " + self.tagTime
-    
     def giveAllCleanedGpsDf(self):
         # without 2019 date and without duplicate rows
         precedentYearRowsTemporaryDf = self.allGpsDf.copy()
@@ -248,7 +240,7 @@ class TurtleData:
         precedentYearRowsTemporaryDf.reset_index(drop=True, inplace=True) # reset index
         #print(precedentYearRowsTemporaryDf)
         print(f"After removing 2019 data, the AllGpsDf called: {self.allGpsDfCsvName}, contained {len(precedentYearRowsTemporaryDf.index)} rows")
-        
+
         ### Eliminate duplicate rows
         # Select duplicate rows except first occurrence based on all columns
         ## example of Selection by Position, to see example duplicated rows ----------------------------------
@@ -272,26 +264,8 @@ class TurtleData:
         print(f"Without duplicated acquisition times, the dataframe has now {len(duplicateRowsTemporaryDf.index)} rows")
         print("The df without duplicated rows and Without duplicated acquisition times is the duplicateRowsTemporaryDf")
         print('--------------')
-
-        #### Eliminate test date before its Turtle tag day Datetime
-        print("Excluding date BEFORE TAG DAY DATETIME")
-        testDateRowsTemporaryDf = duplicateRowsTemporaryDf
-        #print(testDateRowsTemporaryDf[testDateRowsTemporaryDf['Acquisition Time'].astype(str).str.startswith(self.tagDatetime)])
-        ## listing days before
-        print(testDateRowsTemporaryDf[testDateRowsTemporaryDf['Acquisition Time'] < self.tagDatetime])
-        ## dropping them
-        testDateRowsTemporaryDf.drop(testDateRowsTemporaryDf[testDateRowsTemporaryDf['Acquisition Time'] < self.tagDatetime].index, inplace=True)
-        print("TEST -------------- TEST ------- TEST")
-        print(self.tagDatetime)
-        print(testDateRowsTemporaryDf)
-
-        print(f"Without days before turtle tag day, the dataframe has now {len(testDateRowsTemporaryDf.index)} rows")
-        print("The df without duplicated rows, without duplicated acquisition times and without days before turtle tag is the testDateRowsTemporaryDf")
-        print('--------------')
-
-        print("ALL THE DF THAT IS GONNA BE SAVE IN ALL CLEANED GPS DATAFRAME")
         print("Saving this temporary df into the allCleanedGpsDf...")
-        self.allCleanedGpsDf = self.allCleanedGpsDf.append(testDateRowsTemporaryDf, ignore_index=True)
+        self.allCleanedGpsDf = self.allCleanedGpsDf.append(duplicateRowsTemporaryDf, ignore_index=True)
         print(self.allCleanedGpsDf)
         print(self.allCleanedGpsDf.iloc[13:19,1])
         print("The df without duplicated rows is now the self.allCleanedGpsDf")
@@ -457,7 +431,15 @@ class TurtleData:
         self.tempReliableGpsDfWithNoTagDateCsvName = TurtleData.basedNamesForCsv(lastEntry, "tempReliableGpsDfWithNoTagDate", self.turtleTag)
     
     def saveTempReliableGpsDfWithNoTagDateData(self, pathToFilePlusCsvName):
-        self.tempReliableGpsDfWithNoTagDate.to_csv(pathToFilePlusCsvName, index=False)    
+        self.tempReliableGpsDfWithNoTagDate.to_csv(pathToFilePlusCsvName, index=False)
+    
+    def assignTagTurtleDayDatetime(self, TagDate, TagTime):
+        '''
+        the Date and Time of the turtle's Tag Day
+        '''
+        self.tagDate = TagDate
+        self.tagTime = TagTime
+        self.tagDatetime = self.tagDate + " " + self.tagTime
     
     def giveReliableGpsDf(self):
         '''

@@ -165,23 +165,6 @@ def checkIfAllGpsDfHasBeenSaved(turtlesData):
             print(f"The filename {turtleData.allGpsDfCsvName} is not yet in the folder... saving csv")
             pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.allGpsDfCsvName)
             turtleData.saveAllGpsDfData(pathToFilePlusCsvName)
-
-def assignTagDayDatetimeToEachInstance(turtlesData):
-    notFoundTurtleTagDatetime = False
-    for turtleData in turtlesData:
-        if turtleData.getTag() == TAG_TURTLE_1:
-            turtleData.assignTagTurtleDayDatetime(DATE_TAG_TURTLE_1, TIME_TAG_TURTLE_1)
-        elif turtleData.getTag() == TAG_TURTLE_2:
-            turtleData.assignTagTurtleDayDatetime(DATE_TAG_TURTLE_2, TIME_TAG_TURTLE_2)
-        else:
-            notFoundTurtleTagDatetime = True
-            print("Attention!")
-            print(f"{turtleData.turtleTag} has not a Tag Datetime yet!")
-        # for obj in Class, print its tagDatetime
-        print("For obj in Class, print its tagDatetime")
-        print(turtleData.tagDatetime)
-    if not notFoundTurtleTagDatetime:
-        print("Tag Datetime for all instances assign!")
     
 def getAllCleanedGpsDataframes(turtlesData):
     for turtleData in turtlesData:
@@ -306,6 +289,23 @@ def checkIfTempReliableGpsDfWithNoTagDateHasBeenSaved(turtlesData):
     #if key not in sample_dict:
         #sample_dict[key] = value
     #return sample_dict
+
+def assignTagDayDatetimeToEachInstance(turtlesData):
+    notFoundTurtleTagDatetime = False
+    for turtleData in turtlesData:
+        if turtleData.getTag() == TAG_TURTLE_1:
+            turtleData.assignTagTurtleDayDatetime(DATE_TAG_TURTLE_1, TIME_TAG_TURTLE_1)
+        elif turtleData.getTag() == TAG_TURTLE_2:
+            turtleData.assignTagTurtleDayDatetime(DATE_TAG_TURTLE_2, TIME_TAG_TURTLE_2)
+        else:
+            notFoundTurtleTagDatetime = True
+            print("Attention!")
+            print(f"{turtleData.turtleTag} has not a Tag Datetime yet!")
+        # for obj in Class, print its tagDatetime
+        print("For obj in Class, print its tagDatetime")
+        print(turtleData.tagDatetime)
+    if not notFoundTurtleTagDatetime:
+        print("Tag Datetime for all instances assign!")
 
 def getReliableGpsDataframes(turtlesData):
 

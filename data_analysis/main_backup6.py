@@ -25,9 +25,6 @@ def main():
     # SAVE THE ALL GPS DATAFRAME in the Results Folder
     checkIfAllGpsDfHasBeenSaved(turtlesData)
 
-    # 
-    assignTagDayDatetimeToEachInstance(turtlesData)
-
     # now we need to look at the all gps df and delete the duplicates rows, before calculating the errors by speed
     # deleting duplicate rows and 2019 date
     getAllCleanedGpsDataframes(turtlesData)
@@ -45,7 +42,10 @@ def main():
     createTempReliableGpsDfWithNoTagDateCsvNameCsvNameForEachInstance(turtlesData)
 
     # SAVE THE TEMP RELIABLE GPS DATAFRAME WITH NO TAG DATE in the Results Folder
-    checkIfTempReliableGpsDfWithNoTagDateHasBeenSaved(turtlesData)    
+    checkIfTempReliableGpsDfWithNoTagDateHasBeenSaved(turtlesData)
+
+    # 
+    assignTagDayDatetimeToEachInstance(turtlesData)
 
     # Clean Data, filtering 'no GPS Data' from 'GPS Data'
 
