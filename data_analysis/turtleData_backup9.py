@@ -86,7 +86,7 @@ class TurtleData:
     ID_ALLGPSDF_COLUMN_NAME = "All GPS's Track ID"
 
     @staticmethod
-    def basedNamesForCsv(lastEntryRowDF, selfDfNameString, selfTurtleTag, selfSpecificFileName=""):
+    def basedNamesForCsv(lastEntryRowDF, selfDfNameString, selfTurtleTag):
         for value in enumerate(lastEntryRowDF):
             #print(value[1][0])
             lastDate = value[1][0]
@@ -96,7 +96,7 @@ class TurtleData:
             print(stringDate)
             # Give the CSV a Name based on this values above
             # name = allGpsDf_tag_xxxxx_until_lastdate
-            cvsName = selfDfNameString + selfSpecificFileName + "_Tag_" + selfTurtleTag + "_" + stringDate +".csv"
+            cvsName = selfDfNameString + "_Tag_" + selfTurtleTag + "_" + stringDate +".csv"
             print(f"The Name for the {selfDfNameString} CSV for the turtleData {selfTurtleTag} is: ")
             print(cvsName)
             print('--------------')
@@ -129,10 +129,10 @@ class TurtleData:
         #self.allGpsDf2019 = pd.DataFrame()
         self.allCleanedGpsDf = pd.DataFrame()
         self.allCleanedGpsDfCsvName = ""
+        self.tempReliableGpsDfWithNoTagDate = pd.DataFrame()
+        self.tempReliableGpsDfWithNoTagDateCsvName = "" 
         self.reliableGpsDf = pd.DataFrame()
         self.reliableGpsDfCsvName = ""
-        self.noReliableGpsDf = pd.DataFrame()
-        self.noReliableGpsDfCsvName = ""
     #def addElement(self, row, header):
         #self.__dict__= dict(zip(header, row))
 
@@ -310,7 +310,7 @@ class TurtleData:
     def saveAllCleanedGpsDfData(self, pathToFilePlusCsvName):
         self.allCleanedGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
-    def giveReliableGpsDf(self):
+    def giveTempReliableGpsDfWithNoTagDate(self):
         '''
         Remove GPS Errors by Angular velocity/Rotational speed 
         (degree per second)
@@ -385,41 +385,30 @@ class TurtleData:
         #---------
         print('--------------')        
         print(pointsToRemove)
-
-        ### Cond = Points with speed > than 4km/h to be removed from the df (removingGpsErrorsTemporaryDf)
-        ### Cond 2 = Points with speed > than 4km/h to be keep in the df (keepingGpsErrorsTemporaryDf)
-
-        ### TO CREATE A DF WITHOUT SPEED ERRORS = Cond *        
-        cond = removingGpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)
+        
         print('BEFORE DROP - removingGpsErrorsTemporaryDf')
         print(len(removingGpsErrorsTemporaryDf))
+        
+        cond = removingGpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)        
         removingGpsErrorsTemporaryDf.drop(removingGpsErrorsTemporaryDf[cond].index, inplace = True)
         print('AFTER DROP - removingGpsErrorsTemporaryDf')
-        print(len(removingGpsErrorsTemporaryDf))        
+        print(len(removingGpsErrorsTemporaryDf))
+
+        # LATER TRY TO WORK WITH REMOVING DAYS BEFORE TURTLE TAGGED ---------------------------------------------------
+
+        ## cond2 remove datetime before specific datetime
+        ##df['date'] = pd.to_datetime(df['date'])
+        ##res = df[~(df['date'] < '2018-04-01')]
         
-        ### TO CREATE A DF JUST WITH THE SPEED ERRORS = Cond 2 *
-        keepingGpsErrorsTemporaryDf = self.allCleanedGpsDf.copy()
-        ##for index, rows in Time_df.head().iterrows():
-         ##if(rows["Total Time"] < 6.00 ):
-             ##Time_df.loc[index,"Code"] = 1
-        print('BEFORE KEEPING GPS POINTS WITH SPEED > 4KM/H in the keepingGpsErrorsTemporaryDf')
-        print(len(keepingGpsErrorsTemporaryDf))
-        wrongSpeedPoints = []
-        for indexes, rows in keepingGpsErrorsTemporaryDf.iterrows():
-            if(rows['Acquisition Time'] in pointsToRemove):
-                wrongSpeedPoints.append(rows)
-        print(wrongSpeedPoints)
-        print(len(wrongSpeedPoints))
-
-        wrongSpeedDf = pd.DataFrame(wrongSpeedPoints)
-        wrongSpeedDf.reset_index(drop=True, inplace=True)
-        print("TEST AS DATAFRAME wrongSpeedPoints")
-        print(wrongSpeedDf)
-        print(len(wrongSpeedDf))   
-
+        #print("SEE IF DATETIME WORKS")
+        #if self.turtleTag == '710333A':
+            #removingGpsErrorsTemporaryDf['Acquisition Time'] = pd.to_datetime(removingGpsErrorsTemporaryDf['Acquisition Time'])
+            #cond2 = removingGpsErrorsTemporaryDf[(removingGpsErrorsTemporaryDf['Acquisition Time'] < '2020.07.09 23:00:09')] #2020.07.09 23:00:09
+            #print(cond2)
+            #print('--------------')
+            #removingGpsErrorsTemporaryDf.drop(removingGpsErrorsTemporaryDf[cond2].index, inplace = True)
+        
         # ---------------------------------------------------
-        ### CREATING NEW COLUMNS FOR BOTH DATAFRAMES AND SAVE THEM INTO A SELF DF
-        ### 1 - self.reliableGpsDf
          
         removingGpsErrorsTemporaryDf['Distance (m)'] = distances        
         removingGpsErrorsTemporaryDf['Time (s)'] = tripTimes
@@ -428,82 +417,57 @@ class TurtleData:
         print('BEFORE CHANGES - FROM INT TO FLOAT')
         print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
         
-        # # # Removing Square brackets From values in the 'Distance (m)' and 'Speed m/s' Columns
-        # # #remove brackets of the values in Columns        
+        # Removing Square brackets From values in the 'Distance (m)' and 'Speed m/s' Columns
+        #remove brackets of the values in Columns        
         removingGpsErrorsTemporaryDf = removingGpsErrorsTemporaryDf.astype({"Distance (m)":'float', "Speed m/s":'float'}) 
-        # # #removingGpsErrorsTemporaryDf['Distance (m)'] = removingGpsErrorsTemporaryDf['Distance (m)'].str[0] #remove the brackets of the values in the column
-        # # #removingGpsErrorsTemporaryDf['Speed m/s'] = removingGpsErrorsTemporaryDf['Speed m/s'].str[0] #remove the brackets of the values in the column	        
+        #removingGpsErrorsTemporaryDf['Distance (m)'] = removingGpsErrorsTemporaryDf['Distance (m)'].str[0] #remove the brackets of the values in the column
+        #removingGpsErrorsTemporaryDf['Speed m/s'] = removingGpsErrorsTemporaryDf['Speed m/s'].str[0] #remove the brackets of the values in the column	        
         print('AFTER CHANGES - FROM INT TO FLOAT')
         print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
         
-        print("removingGpsErrorsTemporaryDf With new columns")
-        print(removingGpsErrorsTemporaryDf)
-        print(removingGpsErrorsTemporaryDf.dtypes)        
-        print('--------------')
+        #print("With new columns")
+        #print(removingGpsErrorsTemporaryDf)
+        #print(removingGpsErrorsTemporaryDf.dtypes)        
+        #print('--------------')
         
-        # # # Create a ID Column on the Left for the Reliable Tracked Points 
+        # Create a ID Column on the Left for the Reliable Tracked Points 
         speedTrackedPoints = removingGpsErrorsTemporaryDf.index + 1
-        removingGpsErrorsTemporaryDf.insert(0, 'Reliable Speed ID', speedTrackedPoints)
+        removingGpsErrorsTemporaryDf.insert(0, 'Speed Reliable ID', speedTrackedPoints)
         
-        print("removingGpsErrorsTemporaryDf With ID column")
-        print(removingGpsErrorsTemporaryDf)
-        print(removingGpsErrorsTemporaryDf.dtypes)        
-        print('--------------')
+        #print("With ID column")
+        #print(removingGpsErrorsTemporaryDf)
+        #print(removingGpsErrorsTemporaryDf.dtypes)        
+        #print('--------------')
         
-        self.reliableGpsDf = self.reliableGpsDf.append(removingGpsErrorsTemporaryDf, ignore_index=True)
+        self.tempReliableGpsDfWithNoTagDate = self.tempReliableGpsDfWithNoTagDate.append(removingGpsErrorsTemporaryDf, ignore_index=True)
         
-        print("Assign the Reliable GPS DF into self")
-        print(self.reliableGpsDf)
-        print(self.reliableGpsDf.dtypes)        
-        print('--------------')
-
-        # ---------------------------------------------------
-        ### 2 - self.noReliableGpsDf
-        
-        wrongSpeedDf['Speeds > 1,11111 m/s'] = remSpeeds
-        print('BEFORE CHANGES - FROM INT TO FLOAT')
-        print(type(wrongSpeedDf.loc[0, "Speeds > 1,11111 m/s"]))
-        
-        # # # Removing Square brackets From values in the 'Speeds > 1,11111 m/s' Columns
-        # # #remove brackets of the values in Columns        
-        wrongSpeedDf = wrongSpeedDf.astype({"Speeds > 1,11111 m/s":'float'}) 
-        # # #wrongSpeedDf['Speeds > 1,11111 m/s'] = wrongSpeedDf['Speeds > 1,11111 m/s'].str[0] #remove the brackets of the values in the column	        
-        print('AFTER CHANGES - FROM INT TO FLOAT')
-        print(type(wrongSpeedDf.loc[0, "Speeds > 1,11111 m/s"]))
-        
-        print("wrongSpeedDf With new columns")
-        print(wrongSpeedDf)
-        print(wrongSpeedDf.dtypes)        
-        print('--------------')
-        
-        # # # Create a ID Column on the Left for the NO Reliable Tracked Points 
-        speedTrackedPoints = wrongSpeedDf.index + 1
-        wrongSpeedDf.insert(0, 'No Reliable Speed ID', speedTrackedPoints)
-        
-        print("wrongSpeedDf With ID column")
-        print(wrongSpeedDf)
-        print(wrongSpeedDf.dtypes)        
-        print('--------------')
-        
-        self.noReliableGpsDf = self.noReliableGpsDf.append(wrongSpeedDf, ignore_index=True)
-        
-        print("Assign the NO Reliable GPS DF into self")
-        print(self.noReliableGpsDf)
-        print(self.noReliableGpsDf.dtypes)        
+        print("Assign the Reliable GPS DF of the objs")
+        print(self.tempReliableGpsDfWithNoTagDate)
+        print(self.tempReliableGpsDfWithNoTagDate.dtypes)        
         print('--------------')
     
-    def generateReliableGpsDfCsvName(self):
+    def generateTempReliableGpsDfWithNoTagDateCsvName(self):
         # Last entry:
-        lastEntry = self.reliableGpsDf['Acquisition Time'].tail(1)
+        lastEntry = self.tempReliableGpsDfWithNoTagDate['Acquisition Time'].tail(1)
         #print(lastEntry)
         # separing date from time in that column
         lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
         #print(lastEntry)
         # assign the Name in the Class Variable
-        self.reliableGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "reliableGpsDf", self.turtleTag, "_bySpeed")
+        self.tempReliableGpsDfWithNoTagDateCsvName = TurtleData.basedNamesForCsv(lastEntry, "tempReliableGpsDfWithNoTagDate", self.turtleTag)
     
-    def saveReliableGpsData(self, pathToFilePlusCsvName):
-        self.reliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
+    def saveTempReliableGpsDfWithNoTagDateData(self, pathToFilePlusCsvName):
+        self.tempReliableGpsDfWithNoTagDate.to_csv(pathToFilePlusCsvName, index=False)    
+    
+    def giveReliableGpsDf(self):
+        '''
+        Get a Reliable Gps Df with only the Data received after
+        '''
+        
+
+
+
+
 
         # -------- until this bit above works, next, works with saving the reliable df
 
