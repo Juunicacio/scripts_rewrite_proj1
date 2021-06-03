@@ -302,78 +302,28 @@ def checkIfReliableGpsDfHasBeenSaved(turtlesData):
         # AND ALSO TRY TO MAKE THIS ONE FUNCTION TO WAIT UNTIL THE CLEANING HAS BEEN MADE 
         # TO THEN SAVE THE FIRST THE ALL CLEANED GPS DF AND THEN THE RELIABLE GPS DF
 
-def createNoReliableGpsDfCsvNameForEachInstance(turtlesData):
-    # create a noReliableGpsDf's name for each turtleData
-    for turtleData in turtlesData:
-        turtleData.generateNoReliableGpsDfCsvName()
 
-def checkIfNoReliableGpsDfHasBeenSaved(turtlesData):
-    filesInResultsFolder = []   
-    
-    for file in DATACLEANINGRESULTS_FOLDER_ITENS:
-        filesInResultsFolder.append(file)    
-    print(filesInResultsFolder)
+            
 
-    for turtleData in turtlesData:
-        if not filesInResultsFolder:
-            ## Saving AllGpsDf Data 
-            #print(f"The filename {turtleData.allGpsDfCsvName} is not yet in the folder... saving csv")
-            #pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.allGpsDfCsvName)                       
-            #turtleData.saveAllGpsData(pathToFilePlusCsvName)
-            #print(f"{turtleData.allGpsDfCsvName} has been saved in the results folder!")            
-            #print('--------------')
-            ## Saving AllCleanedGps Data
-            #print(f"The filename {turtleData.allCleanedGpsDfCsvName} is not yet in the folder... saving csv")
-            #pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.allCleanedGpsDfCsvName)
-            #turtleData.saveAllCleanedGpsData(pathToFilePlusCsvName)
-            #print(f"{turtleData.allCleanedGpsDfCsvName} has been saved in the results folder!")
-            ## Saving ReliableGpsDf Data
-            #print(f"The filename {turtleData.reliableGpsDfCsvName} is not yet in the folder... saving csv")
-            #pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.reliableGpsDfCsvName)
-            #turtleData.saveReliableGpsData(pathToFilePlusCsvName)
-            #print(f"{turtleData.reliableGpsDfCsvName} has been saved in the results folder!")
-            ## Saving NoReliableGpsDf Data
-            print(f"The filename {turtleData.noReliableGpsDfCsvName} is not yet in the folder... saving csv")
-            pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.noReliableGpsDfCsvName)
-            turtleData.saveNoReliableGpsData(pathToFilePlusCsvName)
-            print(f"{turtleData.noReliableGpsDfCsvName} has been saved in the results folder!")
+        
+        
+        
+        # if this file already exists in the folder do not save it
 
-        #elif turtleData.allGpsDfCsvName in filesInResultsFolder:
-            #print(f"The CSV {turtleData.allGpsDfCsvName} has already been saved in the results folder")
-        #elif turtleData.allCleanedGpsDfCsvName in filesInResultsFolder:
-            #print(f"The CSV {turtleData.allCleanedGpsDfCsvName} has already been saved in the results folder")
-        #elif turtleData.reliableGpsDfCsvName in filesInResultsFolder:
-            #print(f"The CSV {turtleData.reliableGpsDfCsvName} has already been saved in the results folder")
-        elif turtleData.noReliableGpsDfCsvName in filesInResultsFolder:
-            print(f"The CSV {turtleData.noReliableGpsDfCsvName} has already been saved in the results folder")
-        else:            
-            ## Saving AllGpsDf Data
-            #print(f"The filename {turtleData.allGpsDfCsvName} is not yet in the folder... saving csv")
-            #pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.allGpsDfCsvName)
-            #turtleData.saveAllGpsData(pathToFilePlusCsvName)
-            #print(f"{turtleData.allGpsDfCsvName} has been saved in the results folder!")              
-            #print('--------------')
-            ## Saving AllCleanedGps Data
-            #print(f"The filename {turtleData.allCleanedGpsDfCsvName} is not yet in the folder... saving csv")
-            #pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.allCleanedGpsDfCsvName)
-            #turtleData.saveAllCleanedGpsData(pathToFilePlusCsvName)
-            #print(f"{turtleData.allCleanedGpsDfCsvName} has been saved in the results folder!")
-            ## Saving ReliableGpsDf Data
-            #print(f"The filename {turtleData.reliableGpsDfCsvName} is not yet in the folder... saving csv")
-            #pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.reliableGpsDfCsvName)
-            #turtleData.saveReliableGpsData(pathToFilePlusCsvName)
-            #print(f"{turtleData.reliableGpsDfCsvName} has been saved in the results folder!")
-            ## Saving NoReliableGpsDf Data
-            print(f"The filename {turtleData.noReliableGpsDfCsvName} is not yet in the folder... saving csv")
-            pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.noReliableGpsDfCsvName)
-            turtleData.saveNoReliableGpsData(pathToFilePlusCsvName)
-            print(f"{turtleData.noReliableGpsDfCsvName} has been saved in the results folder!")
-        #print(filesInResultsFolder)
-        print('--------------')
 
-        # THIS FUNCTION ABOVE IS THE SAME FUNCTION TO SAVE THE ALL GPS DF, FOR THE All CLEANED GPS 
-        # AND FOR THE RELIABLE GPS
-        # TRY TO DO ONLY ONE FUNCTION FOR ALL,
-        # AND ALSO TRY TO MAKE THIS ONE FUNCTION TO WAIT UNTIL THE CLEANING HAS BEEN MADE 
-        # TO THEN SAVE THE FIRST THE ALL CLEANED GPS DF, THEN THE RELIABLE GPS DF AND THEN 
-        # THE NO RELIABLE GPS
+
+    # for turtleData in turtlesData:
+    #     if turtleData.allGpsDfCsvName in DATACLEANINGRESULTS_FOLDER:
+    #         print(DATACLEANINGRESULTS_FOLDER)
+    #         print(f"The CSV {turtleData.allGpsDfCsvName} has already been saved in the results folder")
+    #     else:
+    #         print(f"The filename {turtleData.allGpsDfCsvName} is not yet in the folder... saving csv")
+    #         pathToFilePlusCsvName = os.path.join(DATACLEANINGRESULTS_FOLDER, turtleData.allGpsDfCsvName)
+    #         turtleData.saveAllGpsData(pathToFilePlusCsvName)
+    #         print(f"{turtleData.allGpsDfCsvName} has been saved in the results folder!")
+        
+
+
+#def getReliableGpsDataframes(turtlesData):
+    #for turtleData in turtlesData:
+        #turtleData.giveReliableGpsDf()

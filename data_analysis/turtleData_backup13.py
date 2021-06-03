@@ -503,7 +503,9 @@ class TurtleData:
         self.reliableGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "reliableGpsDf", self.turtleTag, "_bySpeed")
     
     def saveReliableGpsData(self, pathToFilePlusCsvName):
-        self.reliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)       
+        self.reliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
+
+        # -------- until this bit above works, next, works with saving the reliable df
 
     def generateNoReliableGpsDfCsvName(self):
         # Last entry:
@@ -517,5 +519,3 @@ class TurtleData:
     
     def saveNoReliableGpsData(self, pathToFilePlusCsvName):
         self.noReliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
-
-     # -------- until this bit above works, next, works with saving the reliable df

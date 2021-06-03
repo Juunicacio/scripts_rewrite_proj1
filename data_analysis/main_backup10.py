@@ -52,13 +52,9 @@ def main():
 
     # SAVE THE NO RELIABLE GPS DATAFRAME in the Results Folder    
     checkIfNoReliableGpsDfHasBeenSaved(turtlesData)
-    
+
 
     # Clean Data, filtering 'no GPS Data' from 'GPS Data'
-
-    # see if this column in the no reliable gps dataframe "All GPS's Track ID", has the number of no duplicated columns, coming from 2 dfs from the same turtle with different datetime
-    
-    # then initiate with the depth data
 
 
 if __name__ == "__main__":

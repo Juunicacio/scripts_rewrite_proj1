@@ -503,7 +503,9 @@ class TurtleData:
         self.reliableGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "reliableGpsDf", self.turtleTag, "_bySpeed")
     
     def saveReliableGpsData(self, pathToFilePlusCsvName):
-        self.reliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)       
+        self.reliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
+
+        # -------- until this bit above works, next, works with saving the reliable df
 
     def generateNoReliableGpsDfCsvName(self):
         # Last entry:
@@ -517,5 +519,59 @@ class TurtleData:
     
     def saveNoReliableGpsData(self, pathToFilePlusCsvName):
         self.noReliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
+        
+        
 
-     # -------- until this bit above works, next, works with saving the reliable df
+
+        # Saving Removed Points in another dataframe (removedPointsRowDf) and dropping those out from the gpsErrorsTemporaryDf
+        #self.allGpsDf.drop(self.allGpsDf[~self.allGpsDf['GPS Latitude'].notna()].index, inplace=True)
+        #self.allGpsDf.reset_index(drop=True, inplace=True) # reset index
+        removedPointsRowDf = gpsErrorsTemporaryDf[gpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)]
+        removedPointsRowDf.loc[:,'Speeds > 1,11111 m/s'] = remSpeeds
+        # reseting index
+        removedPointsRowDf.reset_index(drop=True, inplace=True) 
+        removedGPSPoints = removedPointsRowDf.index + 1 
+        # Creating a Column for ID Removed Track Points on the Left
+        removedPointsRowDf.insert(0, 'Removed GPS by Speed', removedGPSPoints) 
+        # Saving the amount of removed points data
+        qtyremovedGPSpointsSept = len(removedPointsRowDf.index) 
+        print(f'QTY OF REMOVED POINTS: {qtyremovedGPSpointsSept}')        
+        # # Count Occurrence of a value in 'GPS Fix Attempt' Column
+        # cntOccurrFixAttemptRemovedPoints = Counter(removedPointsRowDf['GPS Fix Attempt'])
+        # print('Qty Fix Attempt Of Removed Points:') 
+        # print(cntOccurrFixAttemptRemovedPoints)
+        # print('-----------------------')        
+        # # EXPORTING REMOVED POINTS DATA
+        # #removedPointsRowDf.to_csv('Removed_Points_GPS_Data_Tag_333A_Sept.csv', index=False) # Calling DataFrame constructor on list
+
+        # # LATER ON, SAVE REMOVED DATA:
+        # #-2019 DATA REMOVED FROM ALLGPSDF
+        # #-DUPLICATED DATA REMOVED FROM ALLGPSDF
+        # #-REMOVED GPS TRACK POINTS FROM THE ALLCLEANEDGPSDF
+        # #-----------------------------------------------------------
+        
+        #gpsErrorsTemporaryDf.drop(gpsErrorsTemporaryDf[gpsErrorsTemporaryDf['Acquisition Time'].isin(pointsToRemove)].index, inplace=True)
+
+
+        
+    #     #-----------------------------------------------------------
+    #     #Complete the new columns and save only reliable GPS points excluded through speed
+        
+    #     gpsErrorsTemporaryDf.reset_index(drop=True, inplace=True) # reset index
+    #     routePoints = gpsErrorsTemporaryDf.index + 1 
+    #     gpsErrorsTemporaryDf.insert(0, 'Tracked Points', routePoints) # Create a ID Column on the Left for the Tracked Points 
+                
+    #     gpsErrorsTemporaryDf.drop(['ID GPS Points'], axis=1, inplace=True)
+        
+    #     # Add the list values as New Columns of the DataFrame
+    #     gpsErrorsTemporaryDf['Length (m)'] = distances
+    #     gpsErrorsTemporaryDf['Length (m)'] = gpsErrorsTemporaryDf['Length (m)'].str[0] #remove the brackets of the values in the column
+    #     gpsErrorsTemporaryDf['Time (s)'] = tripTimes
+    #     gpsErrorsTemporaryDf['Speed m/s'] = speeds
+    #     gpsErrorsTemporaryDf['Speed m/s'] = gpsErrorsTemporaryDf['Speed m/s'].str[0] #remove the brackets of the values in the column	
+    #     #print(df.dtypes)
+    #     gpsErrorsTemporaryDf['Time (h)'] = pd.to_timedelta(gpsErrorsTemporaryDf['Time (s)'], unit='s') # Add a Column with the Time passed from on Point to another in hours
+
+
+
+#self.reliableGpsDf
