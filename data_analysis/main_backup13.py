@@ -54,8 +54,8 @@ def main():
     # SAVE THE ALL CLEANED GPS DATAFRAME in the Results Folder
     checkIfAllCleanedGpsDfHasBeenSaved(turtlesData)
 
-    # see dfs of reliable gps and no reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
-    getReliableAndNoReliableGpsDataframes(turtlesData)
+    # see dfs of reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
+    getReliableGpsDataframes(turtlesData)
 
     # get name for each RELIABLE GPS DF turtleData
     createReliableGpsDfCsvNameForEachInstance(turtlesData)
@@ -69,14 +69,10 @@ def main():
     # SAVE THE NO RELIABLE GPS DATAFRAME in the Results Folder    
     checkIfNoReliableGpsDfHasBeenSaved(turtlesData)
     
+
+    # Clean Data, filtering 'no GPS Data' from 'GPS Data'
+    
     # then initiate with the depth data
-    getRemainingDataDataframes(turtlesData)
-
-    createRemainingDataDfCsvNameForEachInstance(turtlesData)
-
-    checkIfRemainingDataDfHasBeenSaved(turtlesData)
-
-    #
 
 
 if __name__ == "__main__":

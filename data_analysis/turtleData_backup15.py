@@ -83,17 +83,12 @@ class TurtleData:
     gps_col_names = list([
         C1, C2, C6, C7, C8, C9
     ])
-    principal_depth_col_names = list([
-        C1, C2, C18, C19, C20, C22, C23, C30, C31, C32, C33, C34, C35, C36, 
-        C37, C38, C39, C40, C41, C42, C43, C44, C45, C46, C47, C48, C49
-    ])
     # COLUMN ID NAME
     # Access using TurtleData. before
     ID_ALLGPSDF_COLUMN_NAME = "All GPS's Track ID"
     ID_RELIABLE_COLUMN_NAME = 'Reliable Speed ID'
     ID_NORELIABLE_COLUMN_NAME = 'Removed GPS by Speed'
     ID_NOGPSDATA_COLUMN_NAME = 'New ID'
-    ID_REMAININGDATA_COLUMN_NAME = 'Remaining Data ID'
 
     @staticmethod
     def basedNamesForCsv(lastEntryRowDF, selfDfNameString, selfTurtleTag, selfSpecificFileName=""):
@@ -145,8 +140,6 @@ class TurtleData:
         self.reliableGpsDfCsvName = ""
         self.noReliableGpsDf = pd.DataFrame()
         self.noReliableGpsDfCsvName = ""
-        self.remainingDataDf = pd.DataFrame()
-        self.remainingDataDfCsvName = ""
     #def addElement(self, row, header):
         #self.__dict__= dict(zip(header, row))
 
@@ -174,7 +167,7 @@ class TurtleData:
         temporaryNoGPSData.reset_index(drop=True, inplace=True) # reset index
         
         print('Temporary No GPS df is temporaryNoGPSData')
-        print(temporaryNoGPSData)
+        print(self.temporaryNoGPSData)
 
         self.noGpsDf = self.noGpsDf.append(temporaryNoGPSData, ignore_index=True)
 
@@ -185,19 +178,6 @@ class TurtleData:
         print(self.noGpsDf)
         print(' End of NO GPS Df ^')
         print('--------------')
-    
-    def generateNoGpsDfCsvName(self):
-        # Last entry:
-        lastEntry = self.noGpsDf['Acquisition Time'].tail(1)
-        #print(lastEntry)
-        # separing date from time in that column
-        lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
-        #print(lastEntry)
-        # assign the Name in the Class Variable
-        self.noGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "noGpsDf", self.turtleTag)        
-    
-    def saveNoGpsDfData(self, pathToFilePlusCsvName):
-        self.noGpsDf.to_csv(pathToFilePlusCsvName, index=False)
     
     def giveAllGpsDf(self):
         # see all the columns in the df
@@ -591,45 +571,4 @@ class TurtleData:
     def saveNoReliableGpsData(self, pathToFilePlusCsvName):
         self.noReliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
-    def giveRemainingDataDf(self):
-        ## Remaining Data = No GPS and No Depth data
-        temporaryDfRemainingData = self.noGpsDf.copy()
-        temporaryDfRemainingData = (temporaryDfRemainingData[~temporaryDfRemainingData['Dive Count'].notna()])        
-        temporaryDfRemainingData.reset_index(drop=True, inplace=True) # reset index        
-        print('Temporary No GPS AND NO DEPTH df is temporaryDfRemainingData')
-        print(temporaryDfRemainingData)
-
-        ##blankcolumns and old columns 'New ID' removed
-        temporaryDfRemainingData = temporaryDfRemainingData.dropna(axis=1, how='all') # dropping all columns where are completely empty. '=' the equal signal means to say pandas, I want to modify the copy no the view
-        temporaryDfRemainingData.drop('New ID', axis=1, inplace=True) # remove entire rows or columns based on their name.
-        print("----------without new id column and blank columns-----------")
-        print(temporaryDfRemainingData)
-        temporaryDfRemainingData.reset_index(drop=True, inplace=True) #reset index
-
-        self.remainingDataDf = self.remainingDataDf.append(temporaryDfRemainingData, ignore_index=True)
-        #### Create new column for the new rows ID
-        noDepthNoGpsId = self.remainingDataDf.index + 1
-        self.remainingDataDf.insert(0, TurtleData.ID_REMAININGDATA_COLUMN_NAME, noDepthNoGpsId)
-        print('No REMAINING DATA df WITH NEW ID COLUMN')
-        print(self.remainingDataDf)
-        print(' End of REMAINING DATA Df ^')
-        print('--------------')
-    
-    def generateRemainingDataDfCsvName(self):
-        # Last entry:
-        lastEntry = self.remainingDataDf['Acquisition Time'].tail(1)
-        #print(lastEntry)
-        # separing date from time in that column
-        lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
-        #print(lastEntry)
-        # assign the Name in the Class Variable
-        self.remainingDataDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "remainingDataDf", self.turtleTag)        
-    
-    def saveRemainingDataDf(self, pathToFilePlusCsvName):
-        self.remainingDataDf.to_csv(pathToFilePlusCsvName, index=False)
-
-    # -------- until this bit above works, next, works with Depth data
-    
-    #def giveDepthDataDf(self):
-        ### DEPTH DATA
-        #temporaryDfDepthData = self.noGpsDf.copy()
+     # -------- until this bit above works, next, works with saving the reliable df

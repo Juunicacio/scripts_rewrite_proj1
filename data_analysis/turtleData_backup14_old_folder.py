@@ -83,17 +83,7 @@ class TurtleData:
     gps_col_names = list([
         C1, C2, C6, C7, C8, C9
     ])
-    principal_depth_col_names = list([
-        C1, C2, C18, C19, C20, C22, C23, C30, C31, C32, C33, C34, C35, C36, 
-        C37, C38, C39, C40, C41, C42, C43, C44, C45, C46, C47, C48, C49
-    ])
-    # COLUMN ID NAME
-    # Access using TurtleData. before
     ID_ALLGPSDF_COLUMN_NAME = "All GPS's Track ID"
-    ID_RELIABLE_COLUMN_NAME = 'Reliable Speed ID'
-    ID_NORELIABLE_COLUMN_NAME = 'Removed GPS by Speed'
-    ID_NOGPSDATA_COLUMN_NAME = 'New ID'
-    ID_REMAININGDATA_COLUMN_NAME = 'Remaining Data ID'
 
     @staticmethod
     def basedNamesForCsv(lastEntryRowDF, selfDfNameString, selfTurtleTag, selfSpecificFileName=""):
@@ -134,8 +124,6 @@ class TurtleData:
         self.tagTime = ""
         self.tagDatetime = ""
         self.df = pd.DataFrame()
-        self.noGpsDf = pd.DataFrame()
-        self.noGpsDfCsvName = ""
         self.allGpsDf = pd.DataFrame()
         self.allGpsDfCsvName = ""
         #self.allGpsDf2019 = pd.DataFrame()
@@ -145,8 +133,6 @@ class TurtleData:
         self.reliableGpsDfCsvName = ""
         self.noReliableGpsDf = pd.DataFrame()
         self.noReliableGpsDfCsvName = ""
-        self.remainingDataDf = pd.DataFrame()
-        self.remainingDataDfCsvName = ""
     #def addElement(self, row, header):
         #self.__dict__= dict(zip(header, row))
 
@@ -166,50 +152,17 @@ class TurtleData:
     def getDf(self):        
         return self.df
     
-    def giveNoGpsDf(self):
-        # Clean Data, filtering 'no GPS Data' from 'GPS Data'
-        # Filtering rows that do not contain GPS information
-        temporaryNoGPSData = self.df.copy()
-        temporaryNoGPSData = (temporaryNoGPSData[~temporaryNoGPSData['GPS Latitude'].notna()])
-        temporaryNoGPSData.reset_index(drop=True, inplace=True) # reset index
-        
-        print('Temporary No GPS df is temporaryNoGPSData')
-        print(temporaryNoGPSData)
-
-        self.noGpsDf = self.noGpsDf.append(temporaryNoGPSData, ignore_index=True)
-
-        #### Create new column for the new rows ID
-        newid = self.noGpsDf.index + 1
-        self.noGpsDf.insert(0, TurtleData.ID_NOGPSDATA_COLUMN_NAME, newid)
-        print('No GPS df WITH NEW ID COLUMN')
-        print(self.noGpsDf)
-        print(' End of NO GPS Df ^')
-        print('--------------')
-    
-    def generateNoGpsDfCsvName(self):
-        # Last entry:
-        lastEntry = self.noGpsDf['Acquisition Time'].tail(1)
-        #print(lastEntry)
-        # separing date from time in that column
-        lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
-        #print(lastEntry)
-        # assign the Name in the Class Variable
-        self.noGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "noGpsDf", self.turtleTag)        
-    
-    def saveNoGpsDfData(self, pathToFilePlusCsvName):
-        self.noGpsDf.to_csv(pathToFilePlusCsvName, index=False)
-    
     def giveAllGpsDf(self):
         # see all the columns in the df
         #print(self.df.columns)
         # see one column at a time        
-        temporaryAllGpsDf = self.df.copy()
+        self.allGpsDf = self.df.copy()
         print(TurtleData.gps_col_names)
         tempList = TurtleData.gps_col_names.copy()
-        for c in temporaryAllGpsDf.columns:
+        for c in self.allGpsDf.columns:
             print(c)            
             if c not in tempList:
-                temporaryAllGpsDf.drop(c, inplace=True, axis=1)
+                self.allGpsDf.drop(c, inplace=True, axis=1)
             else:
                 tempList.remove(c)        
 
@@ -218,40 +171,14 @@ class TurtleData:
         else:
             print("The dataframe contains all the GPS columns")
         
-        print('-----TEMPORARY DF with NaN values ---------')
-        print(temporaryAllGpsDf)       
+        print('-----DF with NaN values ---------')
+        print(self.allGpsDf)       
         
         #### Eliminate those GPS's null (NaN) rows from the dataframe
-        temporaryAllGpsDf.drop(temporaryAllGpsDf[~temporaryAllGpsDf['GPS Latitude'].notna()].index, inplace=True)
-        temporaryAllGpsDf.reset_index(drop=True, inplace=True) # reset index
+        self.allGpsDf.drop(self.allGpsDf[~self.allGpsDf['GPS Latitude'].notna()].index, inplace=True)
+        self.allGpsDf.reset_index(drop=True, inplace=True) # reset index
 
-        print('-----SAME TEMPORARY DF without NaN values, BUT WITH DUPLICATED ROWS ---------')
-        print(temporaryAllGpsDf)
-
-        print('--------------')
-        duplicateRowsTemporaryAllGpsDf = temporaryAllGpsDf
-        duplicateRowsTemporaryAllGpsDf = duplicateRowsTemporaryAllGpsDf.drop_duplicates(
-            [
-                'Acquisition Time','Acquisition Start Time', 'GPS Fix Time', 'GPS Fix Attempt', 'GPS Latitude', 'GPS Longitude'
-            ], keep='first'
-        )
-        print(duplicateRowsTemporaryAllGpsDf)
-        print(duplicateRowsTemporaryAllGpsDf.iloc[13:19,1])
-        print(f"Without duplicated rows, the dataframe has now {len(duplicateRowsTemporaryAllGpsDf.index)} rows")
-        # Drop same aquisition time that is giving us error in the calculation of distances and speeds
-        duplicateRowsTemporaryAllGpsDf = duplicateRowsTemporaryAllGpsDf.drop_duplicates(['Acquisition Time'], keep='first')
-        print(duplicateRowsTemporaryAllGpsDf)
-        print(duplicateRowsTemporaryAllGpsDf.iloc[13:19,1])
-        print("The lines where we had the same acquisition time")
-        print(duplicateRowsTemporaryAllGpsDf.iloc[23:29,1])
-        print(f"Without duplicated acquisition times, the dataframe has now {len(duplicateRowsTemporaryAllGpsDf.index)} rows")
-        print("The df without duplicated rows and Without duplicated acquisition times is the duplicateRowsTemporaryDf")
-        print('--------------')
-
-        print('-----SAME TEMPORARY DF without DUPLICATED ROWS ---------')
-        print(duplicateRowsTemporaryAllGpsDf)
-
-        self.allGpsDf = self.allGpsDf.append(duplicateRowsTemporaryAllGpsDf, ignore_index=True)
+        print('-----SAME DF without NaN values ---------')
         print(self.allGpsDf)
 
         ####Create a column for id GPS points to the left
@@ -516,7 +443,7 @@ class TurtleData:
         
         # # # Create a ID Column on the Left for the Reliable Tracked Points 
         speedTrackedPoints = removingGpsErrorsTemporaryDf.index + 1
-        removingGpsErrorsTemporaryDf.insert(0, TurtleData.ID_RELIABLE_COLUMN_NAME, speedTrackedPoints)
+        removingGpsErrorsTemporaryDf.insert(0, 'Reliable Speed ID', speedTrackedPoints)
         
         print("removingGpsErrorsTemporaryDf With ID column")
         print(removingGpsErrorsTemporaryDf)
@@ -551,7 +478,7 @@ class TurtleData:
         
         # # # Create a ID Column on the Left for the NO Reliable Tracked Points 
         speedTrackedPoints = wrongSpeedDf.index + 1
-        wrongSpeedDf.insert(0, TurtleData.ID_NORELIABLE_COLUMN_NAME, speedTrackedPoints)
+        wrongSpeedDf.insert(0, 'Removed GPS by Speed', speedTrackedPoints)
         
         print("wrongSpeedDf With ID column")
         print(wrongSpeedDf)
@@ -591,45 +518,4 @@ class TurtleData:
     def saveNoReliableGpsData(self, pathToFilePlusCsvName):
         self.noReliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
-    def giveRemainingDataDf(self):
-        ## Remaining Data = No GPS and No Depth data
-        temporaryDfRemainingData = self.noGpsDf.copy()
-        temporaryDfRemainingData = (temporaryDfRemainingData[~temporaryDfRemainingData['Dive Count'].notna()])        
-        temporaryDfRemainingData.reset_index(drop=True, inplace=True) # reset index        
-        print('Temporary No GPS AND NO DEPTH df is temporaryDfRemainingData')
-        print(temporaryDfRemainingData)
-
-        ##blankcolumns and old columns 'New ID' removed
-        temporaryDfRemainingData = temporaryDfRemainingData.dropna(axis=1, how='all') # dropping all columns where are completely empty. '=' the equal signal means to say pandas, I want to modify the copy no the view
-        temporaryDfRemainingData.drop('New ID', axis=1, inplace=True) # remove entire rows or columns based on their name.
-        print("----------without new id column and blank columns-----------")
-        print(temporaryDfRemainingData)
-        temporaryDfRemainingData.reset_index(drop=True, inplace=True) #reset index
-
-        self.remainingDataDf = self.remainingDataDf.append(temporaryDfRemainingData, ignore_index=True)
-        #### Create new column for the new rows ID
-        noDepthNoGpsId = self.remainingDataDf.index + 1
-        self.remainingDataDf.insert(0, TurtleData.ID_REMAININGDATA_COLUMN_NAME, noDepthNoGpsId)
-        print('No REMAINING DATA df WITH NEW ID COLUMN')
-        print(self.remainingDataDf)
-        print(' End of REMAINING DATA Df ^')
-        print('--------------')
-    
-    def generateRemainingDataDfCsvName(self):
-        # Last entry:
-        lastEntry = self.remainingDataDf['Acquisition Time'].tail(1)
-        #print(lastEntry)
-        # separing date from time in that column
-        lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
-        #print(lastEntry)
-        # assign the Name in the Class Variable
-        self.remainingDataDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "remainingDataDf", self.turtleTag)        
-    
-    def saveRemainingDataDf(self, pathToFilePlusCsvName):
-        self.remainingDataDf.to_csv(pathToFilePlusCsvName, index=False)
-
-    # -------- until this bit above works, next, works with Depth data
-    
-    #def giveDepthDataDf(self):
-        ### DEPTH DATA
-        #temporaryDfDepthData = self.noGpsDf.copy()
+     # -------- until this bit above works, next, works with saving the reliable df

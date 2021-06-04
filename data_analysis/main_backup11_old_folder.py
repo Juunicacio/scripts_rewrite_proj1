@@ -10,22 +10,6 @@ def main():
     #turtlesData[0].df
     #turtlesData[1].df
 
-    # build dfs of No gps data
-    getNoGpsDataframes(turtlesData)
-
-    # see dfs of No gps data
-    displayNoGpsDf(turtlesData)
-    # or
-    #turtlesData[0].noGpsDf
-    #turtlesData[1].noGpsDf
-
-    # get name for each No gps DF turtleData
-    createNoGpsDfCsvNameForEachInstance(turtlesData)
-
-    # SAVE THE NO GPS DATAFRAME in the Results Folder
-    checkIfNoGpsDfHasBeenSaved(turtlesData)
-
-    #
     # build dfs of all gps
     getAllGpsDataframes(turtlesData)
 
@@ -54,8 +38,8 @@ def main():
     # SAVE THE ALL CLEANED GPS DATAFRAME in the Results Folder
     checkIfAllCleanedGpsDfHasBeenSaved(turtlesData)
 
-    # see dfs of reliable gps and no reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
-    getReliableAndNoReliableGpsDataframes(turtlesData)
+    # see dfs of reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
+    getReliableGpsDataframes(turtlesData)
 
     # get name for each RELIABLE GPS DF turtleData
     createReliableGpsDfCsvNameForEachInstance(turtlesData)
@@ -69,14 +53,12 @@ def main():
     # SAVE THE NO RELIABLE GPS DATAFRAME in the Results Folder    
     checkIfNoReliableGpsDfHasBeenSaved(turtlesData)
     
+
+    # Clean Data, filtering 'no GPS Data' from 'GPS Data'
+
+    # see if this column in the no reliable gps dataframe "All GPS's Track ID", has the number of no duplicated columns, coming from 2 dfs from the same turtle with different datetime
+    
     # then initiate with the depth data
-    getRemainingDataDataframes(turtlesData)
-
-    createRemainingDataDfCsvNameForEachInstance(turtlesData)
-
-    checkIfRemainingDataDfHasBeenSaved(turtlesData)
-
-    #
 
 
 if __name__ == "__main__":

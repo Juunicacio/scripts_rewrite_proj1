@@ -76,8 +76,6 @@ def main():
 
     checkIfRemainingDataDfHasBeenSaved(turtlesData)
 
-    #
-
 
 if __name__ == "__main__":
     main()

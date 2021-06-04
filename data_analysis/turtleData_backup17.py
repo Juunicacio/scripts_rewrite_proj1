@@ -591,6 +591,8 @@ class TurtleData:
     def saveNoReliableGpsData(self, pathToFilePlusCsvName):
         self.noReliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
+    # -------- until this bit above works, next, works with Depth data
+
     def giveRemainingDataDf(self):
         ## Remaining Data = No GPS and No Depth data
         temporaryDfRemainingData = self.noGpsDf.copy()
@@ -627,8 +629,6 @@ class TurtleData:
     
     def saveRemainingDataDf(self, pathToFilePlusCsvName):
         self.remainingDataDf.to_csv(pathToFilePlusCsvName, index=False)
-
-    # -------- until this bit above works, next, works with Depth data
     
     #def giveDepthDataDf(self):
         ### DEPTH DATA

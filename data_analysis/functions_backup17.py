@@ -429,6 +429,7 @@ def checkIfNoReliableGpsDfHasBeenSaved(turtlesData):
         # TO THEN SAVE THE FIRST THE ALL CLEANED GPS DF, THEN THE RELIABLE GPS DF AND THEN 
         # THE NO RELIABLE GPS
     
+# 
 def getRemainingDataDataframes(turtlesData):
     for turtleData in turtlesData:
         turtleData.giveRemainingDataDf()
@@ -520,4 +521,3 @@ def checkIfRemainingDataDfHasBeenSaved(turtlesData):
         # AND ALSO TRY TO MAKE THIS ONE FUNCTION TO WAIT UNTIL THE CLEANING HAS BEEN MADE 
         # TO THEN SAVE THE FIRST THE ALL CLEANED GPS DF, THEN THE RELIABLE GPS DF, THEN 
         # THE NO RELIABLE GPS, AND THEN THE RemainingDataDf
-#
