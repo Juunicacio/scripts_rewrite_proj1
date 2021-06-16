@@ -7,12 +7,17 @@ def main():
 
     # see instances for Obj turtleData created and its dfs
     checkInstancesAndItsDfs(turtlesData)
+    #turtlesData[0].df
+    #turtlesData[1].df
 
     # build dfs of No gps data
     getNoGpsDataframes(turtlesData)
 
     # see dfs of No gps data
     displayNoGpsDf(turtlesData)
+    # or
+    #turtlesData[0].noGpsDf
+    #turtlesData[1].noGpsDf
 
     # get name for each No gps DF turtleData
     createNoGpsDfCsvNameForEachInstance(turtlesData)
@@ -20,11 +25,15 @@ def main():
     # SAVE THE NO GPS DATAFRAME in the Results Folder
     checkIfNoGpsDfHasBeenSaved(turtlesData)
 
+    #
     # build dfs of all gps
     getAllGpsDataframes(turtlesData)
 
     # see dfs of all gps
     displayAllGpsDf(turtlesData)
+    # or
+    #turtlesData[0].allGpsDf
+    #turtlesData[1].allGpsDf
 
     # get name for each ALL GPS DF turtleData
     createAllGpsDfCsvNameForEachInstance(turtlesData)
@@ -32,8 +41,10 @@ def main():
     # SAVE THE ALL GPS DATAFRAME in the Results Folder
     checkIfAllGpsDfHasBeenSaved(turtlesData)
 
+    # 
     assignTagDayDatetimeToEachInstance(turtlesData)
 
+    # now we need to look at the all gps df and delete the duplicates rows, before calculating the errors by speed
     # deleting duplicate rows and 2019 date
     getAllCleanedGpsDataframes(turtlesData)
 
@@ -67,6 +78,7 @@ def main():
     # SAVE THE REMAINING DATA DATAFRAME in the Results Folder 
     checkIfRemainingDataDfHasBeenSaved(turtlesData)
 
+    #
     # build dfs for Depth Data
     getDepthDataDataframes(turtlesData)
 
@@ -76,7 +88,6 @@ def main():
     # SAVE THE DEPTH DATA DATAFRAME in the Results Folder 
     checkIfdepthDataDfHasBeenSaved(turtlesData)
 
-    #
 
 if __name__ == "__main__":
     main()

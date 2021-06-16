@@ -6,10 +6,18 @@ from pyproj import Geod
 import numpy as np # for reliable gps
 from collections import Counter # for reliable gps
 import datetime as dt # for reliable gps
-import sys
 
 class TurtleData:
     """Commom base class for all turtle's data """
+
+    # COLUMN ID NAME
+    # Access using TurtleData. before
+    #ID_RAWDATA_COLUMN_NAME = "Raw Data ID"
+    ID_ALLGPSDF_COLUMN_NAME = "All GPS's Track ID"
+    ID_RELIABLE_COLUMN_NAME = 'Reliable Speed ID'
+    ID_NORELIABLE_COLUMN_NAME = 'Removed GPS by Speed'
+    ID_NOGPSDATA_COLUMN_NAME = 'No GPS Data ID'
+    ID_REMAININGDATA_COLUMN_NAME = 'Remaining Data ID'
 
     C1 = 'Acquisition Time'
     C2 ='Acquisition Start Time'
@@ -72,17 +80,6 @@ class TurtleData:
     C59 ='Diagnostic Dive Data'
     C60 ='Predeployment Data'
     C61 ='Error'
-    
-    # COLUMN ID NAME
-    # Access using TurtleData. before
-    #ID_RAWDATA_COLUMN_NAME = "Raw Data ID"
-    ID_ALLGPSDF_COLUMN_NAME = "All GPS's Track ID"
-    ID_RELIABLE_COLUMN_NAME = 'Reliable Speed ID'
-    ID_NORELIABLE_COLUMN_NAME = 'Removed GPS by Speed'
-    ID_NOGPSDATA_COLUMN_NAME = 'No GPS Data ID'
-    ID_REMAININGDATA_COLUMN_NAME = 'Remaining Data ID'
-    ID_DEPTHDATA_COLUMN_NAME = 'Depth Data ID'
-
     col_names = list([
         C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, 
         C11, C12, C13, C14, C15, C16, C17, C18, C19, C20, 
@@ -96,7 +93,7 @@ class TurtleData:
         C1, C2, C6, C7, C8, C9
     ])
     principal_depth_col_names = list([
-        ID_NOGPSDATA_COLUMN_NAME, C1, C2, C18, C19, C20, C22, C23, C30, C31, C32, C33, C34, C35, C36, 
+        C1, C2, C18, C19, C20, C22, C23, C30, C31, C32, C33, C34, C35, C36, 
         C37, C38, C39, C40, C41, C42, C43, C44, C45, C46, C47, C48, C49
     ])
 
@@ -132,52 +129,13 @@ class TurtleData:
     def calculateSpeed(d, t1, t2):
         speed = d / (t2 - t1)
         return speed
-    
-    @staticmethod
-    def checkIfDfHasBeenSavedAndSaveDf(folderToSaveItems, folderToSave, dataframe, stringDfName):
-        filesInResultsFolder = []       
-        for file in folderToSaveItems:
-            filesInResultsFolder.append(file)    
-        print(filesInResultsFolder)
-        if not filesInResultsFolder:
-            print(f"The filename {stringDfName} is not yet in the folder... saving csv")
-            pathToFilePlusCsvName = os.path.join(folderToSave, stringDfName)
-            dataframe.to_csv(pathToFilePlusCsvName, index=False)
-            print(f"{stringDfName} has been saved in the results folder!")
-        elif stringDfName in filesInResultsFolder:
-            print(f"The CSV {stringDfName} has already been saved in the results folder")
-        else:
-            print(f"The filename {stringDfName} is not yet in the folder... saving csv")
-            pathToFilePlusCsvName = os.path.join(folderToSave, stringDfName)
-            dataframe.to_csv(pathToFilePlusCsvName, index=False)
-            print(f"{stringDfName} has been saved in the results folder!")
-        print('--------------')
 
-    def __init__(self, tag):        
-
-        if not sys.gettrace()==None:
-            # To run with Debug:
-            self.DIRNAME = os.path.dirname(__file__)
-            self.ASSETS_FOLDER = os.path.join(self.DIRNAME, 'assets')
-            ##ASSETS_FOLDER_OBJ = "data_analysis\\assets"
-            self.ASSETS_FOLDER_ITENS = os.listdir(self.ASSETS_FOLDER)# ("data_analysis/assets")
-
-            self.DATACLEANINGRESULTS_FOLDER = os.path.join(self.DIRNAME, 'dataCleaningResults')
-            self.DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(self.DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
-        else:
-            # To run with terminal OR jupyter notebook:
-            self.ASSETS_FOLDER = "assets"
-            self.ASSETS_FOLDER_ITENS = os.listdir(self.ASSETS_FOLDER)# ("assets")
-
-            self.DATACLEANINGRESULTS_FOLDER = "dataCleaningResults"
-            self.DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(self.DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
-
+    def __init__(self, tag):
         self.turtleTag = tag
         self.tagDate = ""
         self.tagTime = ""
         self.tagDatetime = ""
         self.df = pd.DataFrame()
-        #self.noGpsDf = {"dataframe": pd.DataFrame(), "stringDfName": ""}
         self.noGpsDf = pd.DataFrame()
         self.noGpsDfCsvName = ""
         self.allGpsDf = pd.DataFrame()
@@ -193,9 +151,16 @@ class TurtleData:
         self.remainingDataDfCsvName = ""
         self.depthDataDf = pd.DataFrame()
         self.depthDataDfCsvName = ""
+    #def addElement(self, row, header):
+        #self.__dict__= dict(zip(header, row))
 
     def addDataFromCsv(self, filename):
-        temporaryDf = pd.read_csv(filename, skiprows=23, names=TurtleData.col_names)        
+        temporaryDf = pd.read_csv(filename, skiprows=23, names=TurtleData.col_names)
+        
+        #print(f' ITS CURRENT DF IS: {self.df}') 
+        #print('--------------')
+        #print(f' ITS TEMPORARY DF IS {temporaryDf}') 
+        
         self.df = self.df.append(temporaryDf, ignore_index=True)
         self.df.sort_values("Acquisition Time", inplace = True)
 
@@ -218,10 +183,13 @@ class TurtleData:
         # Filtering rows that do not contain GPS information
         temporaryNoGPSData = self.df.copy()
         temporaryNoGPSData = (temporaryNoGPSData[~temporaryNoGPSData['GPS Latitude'].notna()])
-        temporaryNoGPSData.reset_index(drop=True, inplace=True) # reset index        
+        temporaryNoGPSData.reset_index(drop=True, inplace=True) # reset index
+        
         print('Temporary No GPS df is temporaryNoGPSData')
         print(temporaryNoGPSData)
+
         self.noGpsDf = self.noGpsDf.append(temporaryNoGPSData, ignore_index=True)
+
         #### Create new column for the new rows ID
         newid = self.noGpsDf.index + 1
         self.noGpsDf.insert(0, TurtleData.ID_NOGPSDATA_COLUMN_NAME, newid)
@@ -236,12 +204,13 @@ class TurtleData:
         #print(lastEntry)
         # separing date from time in that column
         lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
+        #print(lastEntry)
         # assign the Name in the Class Variable
         self.noGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "noGpsDf", self.turtleTag)        
     
-    def saveNoGpsDfData(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.noGpsDf, self.noGpsDfCsvName)
-
+    def saveNoGpsDfData(self, pathToFilePlusCsvName):
+        self.noGpsDf.to_csv(pathToFilePlusCsvName, index=False)
+    
     def giveAllGpsDf(self):
         # see all the columns in the df
         #print(self.df.columns)
@@ -254,19 +223,23 @@ class TurtleData:
             if c not in tempList:
                 temporaryAllGpsDf.drop(c, inplace=True, axis=1)
             else:
-                tempList.remove(c)
+                tempList.remove(c)        
+
         if tempList:
             print("Colummn Data missing in!")
         else:
             print("The dataframe contains all the GPS columns")
-
+        
         print('-----TEMPORARY DF with NaN values ---------')
-        print(temporaryAllGpsDf)        
+        print(temporaryAllGpsDf)       
+        
         #### Eliminate those GPS's null (NaN) rows from the dataframe
         temporaryAllGpsDf.drop(temporaryAllGpsDf[~temporaryAllGpsDf['GPS Latitude'].notna()].index, inplace=True)
         temporaryAllGpsDf.reset_index(drop=True, inplace=True) # reset index
+
         print('-----SAME TEMPORARY DF without NaN values, BUT WITH DUPLICATED ROWS ---------')
         print(temporaryAllGpsDf)
+
         print('--------------')
         duplicateRowsTemporaryAllGpsDf = temporaryAllGpsDf
         duplicateRowsTemporaryAllGpsDf = duplicateRowsTemporaryAllGpsDf.drop_duplicates(
@@ -286,13 +259,17 @@ class TurtleData:
         print(f"Without duplicated acquisition times, the dataframe has now {len(duplicateRowsTemporaryAllGpsDf.index)} rows")
         print("The df without duplicated rows and Without duplicated acquisition times is the duplicateRowsTemporaryDf")
         print('--------------')
+
         print('-----SAME TEMPORARY DF without DUPLICATED ROWS ---------')
         print(duplicateRowsTemporaryAllGpsDf)
+
         self.allGpsDf = self.allGpsDf.append(duplicateRowsTemporaryAllGpsDf, ignore_index=True)
         print(self.allGpsDf)
+
         ####Create a column for id GPS points to the left
         trackId = self.allGpsDf.index + 1
-        self.allGpsDf.insert(0, TurtleData.ID_ALLGPSDF_COLUMN_NAME, trackId)        
+        self.allGpsDf.insert(0, TurtleData.ID_ALLGPSDF_COLUMN_NAME, trackId)
+        
         print(self.allGpsDf)        
         print(' End of all GPS Df ^')
         print('--------------')    
@@ -306,9 +283,9 @@ class TurtleData:
         #print(lastEntry)
         # assign the Name in the Class Variable
         self.allGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "allGpsDf", self.turtleTag)        
-
-    def saveAllGpsDfData(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.allGpsDf, self.allGpsDfCsvName)
+    
+    def saveAllGpsDfData(self, pathToFilePlusCsvName):
+        self.allGpsDf.to_csv(pathToFilePlusCsvName, index=False)
     
     def assignTagTurtleDayDatetime(self, TagDate, TagTime):
         '''
@@ -322,6 +299,33 @@ class TurtleData:
         # without 2019 date and without duplicate rows
         precedentYearRowsTemporaryDf = self.allGpsDf.copy()
         print(f"Before cleaning, the AllGpsDf called: {self.allGpsDfCsvName}, contained {len(precedentYearRowsTemporaryDf.index)} rows")
+        
+        ##### ---------- This Part is not needed ---------- #####
+        # Remove 2019 data from 'Acquisition Time column:
+        dateColumn = precedentYearRowsTemporaryDf['Acquisition Time']
+        #print(dateColumn)
+        # separing date from time in that column
+        dateColumn = pd.Series([[y for y in x.split()] for x in dateColumn])
+        #print(dateColumn)
+        all2019DateData = []
+        allOtherDateData = []        
+        for value in enumerate(dateColumn):
+            #print(value[1][0])
+            # assign the date rows to the variable dateData
+            dateData = value[1][0]
+            # removing 2019 from the list
+            if dateData.startswith('2019'):
+                #print(f"dateData that starts with 2019 = {dateData}")
+                # append the 2019 data to the list
+                all2019DateData.append(dateData)
+            else:
+                #print(f"dateData that do not starts with 2019 = {dateData}")
+                # append any other data to this list
+                allOtherDateData.append(dateData)
+        #print(f" 2019 list = {all2019DateData}")
+        #print(f" 2020/2021 list = {allOtherDateData}")
+        ##### ---------- END OF the Part not needed ---------- #####
+
         #### Eliminate those 2019 data rows from the dataframe
         ### example: df = df[~df['c'].astype(str).str.startswith('1')]
         print(f"Removing 2019 data from the {self.allGpsDfCsvName}")
@@ -329,6 +333,7 @@ class TurtleData:
         precedentYearRowsTemporaryDf.reset_index(drop=True, inplace=True) # reset index
         #print(precedentYearRowsTemporaryDf)
         print(f"After removing 2019 data, the AllGpsDf called: {self.allGpsDfCsvName}, contained {len(precedentYearRowsTemporaryDf.index)} rows")
+        
         ### Eliminate duplicate rows
         # Select duplicate rows except first occurrence based on all columns
         ## example of Selection by Position, to see example duplicated rows ----------------------------------
@@ -352,6 +357,7 @@ class TurtleData:
         print(f"Without duplicated acquisition times, the dataframe has now {len(duplicateRowsTemporaryDf.index)} rows")
         print("The df without duplicated rows and Without duplicated acquisition times is the duplicateRowsTemporaryDf")
         print('--------------')
+
         #### Eliminate test date before its Turtle tag day Datetime
         print("Excluding date BEFORE TAG DAY DATETIME")
         testDateRowsTemporaryDf = duplicateRowsTemporaryDf
@@ -363,9 +369,11 @@ class TurtleData:
         print("TEST -------------- TEST ------- TEST")
         print(self.tagDatetime)
         print(testDateRowsTemporaryDf)
+
         print(f"Without days before turtle tag day, the dataframe has now {len(testDateRowsTemporaryDf.index)} rows")
         print("The df without duplicated rows, without duplicated acquisition times and without days before turtle tag is the testDateRowsTemporaryDf")
         print('--------------')
+
         print("ALL THE DF THAT IS GONNA BE SAVE IN ALL CLEANED GPS DATAFRAME")
         print("Saving this temporary df into the allCleanedGpsDf...")
         self.allCleanedGpsDf = self.allCleanedGpsDf.append(testDateRowsTemporaryDf, ignore_index=True)
@@ -383,9 +391,9 @@ class TurtleData:
         #print(lastEntry)
         # assign the Name in the Class Variable
         self.allCleanedGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "allCleanedGpsDf", self.turtleTag)
-
-    def saveAllCleanedGpsDfData(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.allCleanedGpsDf, self.allCleanedGpsDfCsvName)
+    
+    def saveAllCleanedGpsDfData(self, pathToFilePlusCsvName):
+        self.allCleanedGpsDf.to_csv(pathToFilePlusCsvName, index=False)
 
     def giveReliableGpsDfAndNoReliableGps(self):
         '''
@@ -403,6 +411,19 @@ class TurtleData:
         latitudes = removingGpsErrorsTemporaryDf[['GPS Latitude']].to_numpy() 
         longitudes = removingGpsErrorsTemporaryDf[['GPS Longitude']].to_numpy()
         acquisitionTimes = removingGpsErrorsTemporaryDf[['Acquisition Time']].to_numpy()
+        
+        #latitudes = removingGpsErrorsTemporaryDf['GPS Latitude'].reset_index().values
+        #longitudes = removingGpsErrorsTemporaryDf['GPS Longitude'].reset_index().values
+        ##acquisitionTimes = removingGpsErrorsTemporaryDf[['Acquisition Time']].reset_index().values
+        #acquisitionTimes = removingGpsErrorsTemporaryDf[['Acquisition Time']].to_numpy()        
+        
+        #print(latitudes.dtype)
+        #print(longitudes.dtype)
+        #print(acquisitionTimes.dtype)
+        
+        #print(latitudes)
+        #print(longitudes)
+        #print(acquisitionTimes)
 
         distances = []
         tripTimes = []
@@ -449,6 +470,7 @@ class TurtleData:
         #---------
         print('--------------')        
         print(pointsToRemove)
+
         ### Cond = Points with speed > than 4km/h to be removed from the df (removingGpsErrorsTemporaryDf)
         ### Cond 2 = Points with speed > than 4km/h to be keep in the df (keepingGpsErrorsTemporaryDf)
 
@@ -478,51 +500,62 @@ class TurtleData:
         wrongSpeedDf.reset_index(drop=True, inplace=True)
         print("TEST AS DATAFRAME wrongSpeedPoints")
         print(wrongSpeedDf)
-        print(len(wrongSpeedDf))
+        print(len(wrongSpeedDf))   
+
         # ---------------------------------------------------
         ### CREATING NEW COLUMNS FOR BOTH DATAFRAMES AND SAVE THEM INTO A SELF DF
-        ### 1 - self.reliableGpsDf         
+        ### 1 - self.reliableGpsDf
+         
         removingGpsErrorsTemporaryDf['Distance (m)'] = distances        
         removingGpsErrorsTemporaryDf['Time (s)'] = tripTimes
         removingGpsErrorsTemporaryDf['Speed m/s'] = speeds
         removingGpsErrorsTemporaryDf['Time (h)'] = pd.to_timedelta(removingGpsErrorsTemporaryDf['Time (s)'], unit='s') # Add a Column with the Time passed from on Point to another in hours
         print('BEFORE CHANGES - FROM INT TO FLOAT')
-        print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))        
+        print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
+        
         # # # Removing Square brackets From values in the 'Distance (m)' and 'Speed m/s' Columns
         # # #remove brackets of the values in Columns        
         removingGpsErrorsTemporaryDf = removingGpsErrorsTemporaryDf.astype({"Distance (m)":'float', "Speed m/s":'float'}) 
         # # #removingGpsErrorsTemporaryDf['Distance (m)'] = removingGpsErrorsTemporaryDf['Distance (m)'].str[0] #remove the brackets of the values in the column
         # # #removingGpsErrorsTemporaryDf['Speed m/s'] = removingGpsErrorsTemporaryDf['Speed m/s'].str[0] #remove the brackets of the values in the column	        
         print('AFTER CHANGES - FROM INT TO FLOAT')
-        print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))        
+        print(type(removingGpsErrorsTemporaryDf.loc[0, 'Distance (m)']))
+        
         print("removingGpsErrorsTemporaryDf With new columns")
         print(removingGpsErrorsTemporaryDf)
         print(removingGpsErrorsTemporaryDf.dtypes)        
-        print('--------------')        
+        print('--------------')
+        
         # # # Create a ID Column on the Left for the Reliable Tracked Points 
         speedTrackedPoints = removingGpsErrorsTemporaryDf.index + 1
-        removingGpsErrorsTemporaryDf.insert(0, TurtleData.ID_RELIABLE_COLUMN_NAME, speedTrackedPoints)        
+        removingGpsErrorsTemporaryDf.insert(0, TurtleData.ID_RELIABLE_COLUMN_NAME, speedTrackedPoints)
+        
         print("removingGpsErrorsTemporaryDf With ID column")
         print(removingGpsErrorsTemporaryDf)
         print(removingGpsErrorsTemporaryDf.dtypes)        
-        print('--------------')        
-        self.reliableGpsDf = self.reliableGpsDf.append(removingGpsErrorsTemporaryDf, ignore_index=True)        
+        print('--------------')
+        
+        self.reliableGpsDf = self.reliableGpsDf.append(removingGpsErrorsTemporaryDf, ignore_index=True)
+        
         print("Assign the Reliable GPS DF into self")
         print(self.reliableGpsDf)
         print(self.reliableGpsDf.dtypes)        
         print('--------------')
-        # ---------------------------------------------------
 
-        ### 2 - self.noReliableGpsDf        
+        # ---------------------------------------------------
+        ### 2 - self.noReliableGpsDf
+        
         wrongSpeedDf['Speeds > 1,11111 m/s'] = remSpeeds
         print('BEFORE CHANGES - FROM INT TO FLOAT')
-        print(type(wrongSpeedDf.loc[0, "Speeds > 1,11111 m/s"]))        
+        print(type(wrongSpeedDf.loc[0, "Speeds > 1,11111 m/s"]))
+        
         # # # Removing Square brackets From values in the 'Speeds > 1,11111 m/s' Columns
         # # #remove brackets of the values in Columns        
         wrongSpeedDf = wrongSpeedDf.astype({"Speeds > 1,11111 m/s":'float'}) 
         # # #wrongSpeedDf['Speeds > 1,11111 m/s'] = wrongSpeedDf['Speeds > 1,11111 m/s'].str[0] #remove the brackets of the values in the column	        
         print('AFTER CHANGES - FROM INT TO FLOAT')
-        print(type(wrongSpeedDf.loc[0, "Speeds > 1,11111 m/s"]))        
+        print(type(wrongSpeedDf.loc[0, "Speeds > 1,11111 m/s"]))
+        
         print("wrongSpeedDf With new columns")
         print(wrongSpeedDf)
         print(wrongSpeedDf.dtypes)        
@@ -530,12 +563,15 @@ class TurtleData:
         
         # # # Create a ID Column on the Left for the NO Reliable Tracked Points 
         speedTrackedPoints = wrongSpeedDf.index + 1
-        wrongSpeedDf.insert(0, TurtleData.ID_NORELIABLE_COLUMN_NAME, speedTrackedPoints)        
+        wrongSpeedDf.insert(0, TurtleData.ID_NORELIABLE_COLUMN_NAME, speedTrackedPoints)
+        
         print("wrongSpeedDf With ID column")
         print(wrongSpeedDf)
         print(wrongSpeedDf.dtypes)        
-        print('--------------')        
-        self.noReliableGpsDf = self.noReliableGpsDf.append(wrongSpeedDf, ignore_index=True)        
+        print('--------------')
+        
+        self.noReliableGpsDf = self.noReliableGpsDf.append(wrongSpeedDf, ignore_index=True)
+        
         print("Assign the NO Reliable GPS DF into self")
         print(self.noReliableGpsDf)
         print(self.noReliableGpsDf.dtypes)        
@@ -550,10 +586,10 @@ class TurtleData:
         #print(lastEntry)
         # assign the Name in the Class Variable
         self.reliableGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "reliableGpsDf", self.turtleTag, "_bySpeed")
+    
+    def saveReliableGpsData(self, pathToFilePlusCsvName):
+        self.reliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)       
 
-    def saveReliableGpsData(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.reliableGpsDf, self.reliableGpsDfCsvName)
-     
     def generateNoReliableGpsDfCsvName(self):
         # Last entry:
         lastEntry = self.noReliableGpsDf['Acquisition Time'].tail(1)
@@ -564,8 +600,8 @@ class TurtleData:
         # assign the Name in the Class Variable
         self.noReliableGpsDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "noReliableGpsDf", self.turtleTag, "_bySpeed")
     
-    def saveNoReliableGpsData(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.noReliableGpsDf, self.noReliableGpsDfCsvName)
+    def saveNoReliableGpsData(self, pathToFilePlusCsvName):
+        self.noReliableGpsDf.to_csv(pathToFilePlusCsvName, index=False)
     
     ## Remaining Data = No GPS and No Depth data
     def giveRemainingDataDf(self):        
@@ -575,50 +611,15 @@ class TurtleData:
         print('Temporary No GPS AND NO DEPTH df is temporaryDfRemainingData')
         print(temporaryDfRemainingData)
 
-        ##blankcolumns removed
+        ##blankcolumns and old columns 'New ID' removed
         temporaryDfRemainingData = temporaryDfRemainingData.dropna(axis=1, how='all') # dropping all columns where are completely empty. '=' the equal signal means to say pandas, I want to modify the copy no the view
-        temporaryDfRemainingData.reset_index(drop=True, inplace=True) # reset index 
         #temporaryDfRemainingData.drop(TurtleData.ID_NOGPSDATA_COLUMN_NAME, axis=1, inplace=True) # remove entire rows or columns based on their name.
         #print("----------without new id column and blank columns-----------")
         print("----------without blank columns-----------")
         print(temporaryDfRemainingData)
-        print(f"Before cleaning, the remainingDataDf called: {self.remainingDataDfCsvName}, contained {len(temporaryDfRemainingData.index)} rows")
-        print('--------------')
-        duplicateRowsRemainingDataTemporaryDf = temporaryDfRemainingData
-        duplicateRowsRemainingDataTemporaryDf = duplicateRowsRemainingDataTemporaryDf.drop_duplicates(
-            [
-                'Acquisition Time','Acquisition Start Time', 'Iridium CEP Radius', 'Iridium Latitude', 'Iridium Longitude', 'Temperature', 
-                'Satellite Uplink', 'Receive Time', 'Repetition Count', 'Low Voltage', 'Saltwater Failsafe', 'Schedule Set', 'Diagnostic Dive Data'
-            ], keep='first'
-        )
-        print(duplicateRowsRemainingDataTemporaryDf)
-        print(duplicateRowsRemainingDataTemporaryDf.iloc[59:69,1])
-        print(f"Without duplicated rows, the dataframe has now {len(duplicateRowsRemainingDataTemporaryDf.index)} rows")
-        
-        #### Eliminate test date before its Turtle tag day Datetime
-        print("Excluding date BEFORE TAG DAY DATETIME")
-        testDateRowsRemainingDataTemporaryDf = duplicateRowsRemainingDataTemporaryDf
-        #print(testDateRowsTemporaryDf[testDateRowsTemporaryDf['Acquisition Time'].astype(str).str.startswith(self.tagDatetime)])
-        ## listing days before
-        print(testDateRowsRemainingDataTemporaryDf[testDateRowsRemainingDataTemporaryDf['Acquisition Time'] < self.tagDatetime])
-        ## dropping them
-        testDateRowsRemainingDataTemporaryDf.drop(testDateRowsRemainingDataTemporaryDf[testDateRowsRemainingDataTemporaryDf['Acquisition Time'] < self.tagDatetime].index, inplace=True)
-        print("TEST -------------- TEST ------- TEST")
-        print(self.tagDatetime)
-        print(testDateRowsRemainingDataTemporaryDf)
-        testDateRowsRemainingDataTemporaryDf.reset_index(drop=True, inplace=True) #reset index
-        print('--------reset index------')
-        print(testDateRowsRemainingDataTemporaryDf)
-        print(f"Without days before turtle tag day, the dataframe has now {len(testDateRowsRemainingDataTemporaryDf.index)} rows")
-        print("The df without duplicated rows and without days before turtle tag is the testDateRowsRemainingDataTemporaryDf")
-        print('--------------')
-        print("ALL THE DF THAT IS GONNA BE SAVE IN remainingDataDf DATAFRAME")
-        print("Saving this temporary df into the remainingDataDf...")
-        self.remainingDataDf = self.remainingDataDf.append(testDateRowsRemainingDataTemporaryDf, ignore_index=True)
-        print(self.remainingDataDf)
-        print(self.remainingDataDf.iloc[59:69,1])
-        print("The df without duplicated rows is now the self.remainingDataDf")
+        temporaryDfRemainingData.reset_index(drop=True, inplace=True) #reset index
 
+        self.remainingDataDf = self.remainingDataDf.append(temporaryDfRemainingData, ignore_index=True)
         #### Create new column for the new rows ID
         noDepthNoGpsId = self.remainingDataDf.index + 1
         self.remainingDataDf.insert(0, TurtleData.ID_REMAININGDATA_COLUMN_NAME, noDepthNoGpsId)
@@ -626,6 +627,9 @@ class TurtleData:
         print(self.remainingDataDf)
         print(' End of REMAINING DATA Df ^')
         print('--------------')
+
+        ## TO DO : REMOVE DUPLICATED ROWS
+        ## AND DATA AFTER TAG
     
     def generateRemainingDataDfCsvName(self):
         # Last entry:
@@ -636,14 +640,16 @@ class TurtleData:
         #print(lastEntry)
         # assign the Name in the Class Variable
         self.remainingDataDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "remainingDataDf", self.turtleTag)        
-
-    def saveRemainingDataDf(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.remainingDataDf, self.remainingDataDfCsvName)
+    
+    def saveRemainingDataDf(self, pathToFilePlusCsvName):
+        self.remainingDataDf.to_csv(pathToFilePlusCsvName, index=False)
+    
     # -------- end of Remaining Data
 
     def giveDepthDataDf(self): # depthDataDf
         ### DEPTH DATA
-        temporaryDfDepthData = self.noGpsDf.copy()
+        temporaryDfDepthData = self.noGpsDf.copy()        
+
         # List of columns that contains depth data on the original df
         # principal_depth_col_names
         columnsTempList = TurtleData.principal_depth_col_names.copy()
@@ -653,66 +659,30 @@ class TurtleData:
                 temporaryDfDepthData.drop(c, inplace=True, axis=1)
             else:
                 #remove the column for the list. This help me to know if the is missing some column I need in the rawdata
-                columnsTempList.remove(c)            
+                columnsTempList.remove(c)
+            
         print(temporaryDfDepthData)
         print('-----------------------')
         # if remains some column in this list, means that this column is missing on the rawdata
         if columnsTempList:
-            print("Some data is missing!")        
+            print("Some data is missing!")
+        
         ## eliminate those Depth's null (NaN) rows from the dataframe
         ## eliminate all the rows that are not Dive informations
         temporaryDfDepthData.drop(temporaryDfDepthData[~temporaryDfDepthData['Dive Count'].notna()].index, inplace=True)
         temporaryDfDepthData.reset_index(drop=True, inplace=True) #reset index
         print(temporaryDfDepthData)
-        #--------------------------
-        print(f"Before cleaning, the depthDataDf called: {self.depthDataDfCsvName}, contained {len(temporaryDfDepthData.index)} rows")
-        print('--------------')
-        duplicateRowsDepthDataTemporaryDf = temporaryDfDepthData
-        duplicateRowsDepthDataTemporaryDf = duplicateRowsDepthDataTemporaryDf.drop_duplicates(
-            [
-                'Acquisition Time','Acquisition Start Time', 'Dive Count', 'Average Dive Duration', 'Maximum Dive Depth',
-                'Layer 1 Dive Count', 'Layer 2 Dive Count', 'Layer 3 Dive Count'
-            ], keep='first'
-        )
-        print(duplicateRowsDepthDataTemporaryDf)
-        print(duplicateRowsDepthDataTemporaryDf.iloc[59:69,1])
-        print(f"Without duplicated rows, the dataframe has now {len(duplicateRowsDepthDataTemporaryDf.index)} rows")
+
+        self.depthDataDf = self.depthDataDf.append(temporaryDfDepthData, ignore_index=True)
         
-        #### Eliminate test date before its Turtle tag day Datetime
-        print("Excluding date BEFORE TAG DAY DATETIME")
-        testDateRowsDepthDataTemporaryDf = duplicateRowsDepthDataTemporaryDf
-        #print(testDateRowsTemporaryDf[testDateRowsTemporaryDf['Acquisition Time'].astype(str).str.startswith(self.tagDatetime)])
-        ## listing days before
-        print(testDateRowsDepthDataTemporaryDf[testDateRowsDepthDataTemporaryDf['Acquisition Time'] < self.tagDatetime])
-        ## dropping them
-        testDateRowsDepthDataTemporaryDf.drop(testDateRowsDepthDataTemporaryDf[testDateRowsDepthDataTemporaryDf['Acquisition Time'] < self.tagDatetime].index, inplace=True)
-        print("TEST -------------- TEST ------- TEST")
-        print(self.tagDatetime)
-        print(testDateRowsDepthDataTemporaryDf)
-        testDateRowsDepthDataTemporaryDf.reset_index(drop=True, inplace=True) #reset index
-        print('--------reset index------')
-        print(testDateRowsDepthDataTemporaryDf)
-        print(f"Without days before turtle tag day, the dataframe has now {len(testDateRowsDepthDataTemporaryDf.index)} rows")
-        print("The df without duplicated rows and without days before turtle tag is the testDateRowsDepthDataTemporaryDf")
-        print('--------------')
-        print("ALL THE DF THAT IS GONNA BE SAVE INTO the depthDataDf DATAFRAME")
-        print("Saving this temporary df into the depthDataDf...")
-        self.depthDataDf = self.depthDataDf.append(testDateRowsDepthDataTemporaryDf, ignore_index=True)
+        print("Assign the depthDataDf into self")
         print(self.depthDataDf)
-        print(self.depthDataDf.iloc[59:69,1])         
-        print("The df without duplicated rows and without days before turtle tag is now the self.depthDataDf")
-
-        #### Create new column for the new rows ID
-        depthId = self.depthDataDf.index + 1
-        self.depthDataDf.insert(0, TurtleData.ID_DEPTHDATA_COLUMN_NAME, depthId)
-        print('depthDataDf WITH NEW ID COLUMN')
-        print(self.depthDataDf)
-        print(self.depthDataDf.dtypes) 
-        print(' End of depthDataDf ^')
+        print(self.depthDataDf.dtypes)        
         print('--------------')
 
-        ## TO DO:
-        # CHANGE SOME COLUMN VALUES TO PERCENTAGE NUMBER BEFORE REMOVING THE DUPLICATED COLUMNS
+        ## TO DO : REMOVE DUPLICATED ROWS
+        ## AND DATA AFTER TAG
+        ## and leave the id of no gps data within the depth data id
     
     def generateDepthDataDfCsvName(self):
         # Last entry:
@@ -722,7 +692,22 @@ class TurtleData:
         lastEntry = pd.Series([[y for y in x.split()] for x in lastEntry])
         #print(lastEntry)
         # assign the Name in the Class Variable
-        self.depthDataDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "depthDataDf", self.turtleTag)
+        self.depthDataDfCsvName = TurtleData.basedNamesForCsv(lastEntry, "depthDataDf", self.turtleTag)        
+    
+    def saveDepthDataDf(self, pathToFilePlusCsvName):
+        self.depthDataDf.to_csv(pathToFilePlusCsvName, index=False)
+            
+    # -------- try to do one function to save all dataframes
 
-    def saveDepthDataDf(self):
-        return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.depthDataDf, self.depthDataDfCsvName)
+    #def saveDataFrame(self, dataframe, pathToFilePlusCsvName):
+        #dataframe.to_csv(pathToFilePlusCsvName, index=false)
+
+
+    #def saveAllDataframes(self)
+        #saveDataFrame(td.remainingDataDf, "path")
+        #saveDataFrame(td.remainingDataDf, "path")
+        #saveDataFrame(td.remainingDataDf, "path")
+        #saveDataFrame(td.remainingDataDf, "path")
+    
+    
+    

@@ -37,6 +37,8 @@ else:
     DATACLEANINGRESULTS_FOLDER = "dataCleaningResults"
     DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
 
+
+
 TAG_TURTLE_1 = '710333a'
 DATE_TAG_TURTLE_1 = '2020.07.09'
 TIME_TAG_TURTLE_1 = '23:00:09'
