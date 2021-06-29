@@ -683,9 +683,6 @@ class TurtleData:
 
         print(temporaryDfDepthData)
 
-        #Changing data type of multiple columns 
-        #df['Percent'] = df['Grade'].astype(str) + '%'
-
         temporaryDfDepthData['Underwater Percentage'] = temporaryDfDepthData['Underwater Percentage'].astype(str) + '%'
         temporaryDfDepthData['Layer 1 Percentage'] = temporaryDfDepthData['Layer 1 Percentage'].astype(str) + '%'
         temporaryDfDepthData['Layer 2 Percentage'] = temporaryDfDepthData['Layer 2 Percentage'].astype(str) + '%'
@@ -699,7 +696,29 @@ class TurtleData:
         temporaryDfDepthData['Layer 10 Percentage'] = temporaryDfDepthData['Layer 10 Percentage'].astype(str) + '%'
 
         print(temporaryDfDepthData.dtypes)
+
         
+        #Changing data type of multiple columns 
+        #empDfObj = empDfObj.astype({'Age': 'float64', 'Marks': 'object'})
+        #df['Percent'] = df['Grade'].astype(str) + '%'
+
+        
+        # temporaryDfDepthData = temporaryDfDepthData.astype({
+        #     'Underwater Percentage': 'float64',
+        #     'Layer 1 Percentage': 'float64',
+        #     'Layer 2 Percentage': 'float64',
+        #     'Layer 3 Percentage': 'float64',
+        #     'Layer 4 Percentage': 'float64',
+        #     'Layer 5 Percentage': 'float64',
+        #     'Layer 6 Percentage': 'float64',
+        #     'Layer 7 Percentage': 'float64',
+        #     'Layer 8 Percentage': 'float64',
+        #     'Layer 9 Percentage': 'float64',
+        #     'Layer 10 Percentage': 'float64'})
+
+        # print(temporaryDfDepthData.dtypes)
+
+
         #--------------------------
         print(f"Before cleaning, the depthDataDf called: {self.depthDataDfCsvName}, contained {len(temporaryDfDepthData.index)} rows")
         print('--------------')
@@ -746,6 +765,9 @@ class TurtleData:
         print(self.depthDataDf.dtypes) 
         print(' End of depthDataDf ^')
         print('--------------')
+
+        ## TO DO:
+        # CHANGE SOME COLUMN VALUES TO PERCENTAGE NUMBER BEFORE REMOVING THE DUPLICATED COLUMNS
     
     def generateDepthDataDfCsvName(self):
         # Last entry:

@@ -667,6 +667,19 @@ class TurtleData:
         print(temporaryDfDepthData.dtypes)
         #--------------------------
         #converting number to percentage in layer columns
+        #df['C'] = df['C'].astype(float).map(lambda n: '{:.2%}'.format(n))
+        #df['C'] = df['C'].astype(float).map("{:.2%}".format)
+        #(Sad to see it deprecated.)
+
+        #.to_numeric(df["y"])
+        #Changing data type of multiple columns 
+        #empDfObj = empDfObj.astype({'Age': 'float64', 'Marks': 'object'})
+
+        #df['range'] = df['range'].str.replace(',','-')
+        #df.select_dtypes(['object']).columns
+
+        #if sum(df["filename"].astype("str").str.contains("80900026941984")) > 0:
+
         #df.sport = df.sport.apply(lambda x: 'ball sport' if 'ball' in x else x)
 
         temporaryDfDepthData['Underwater Percentage'] = temporaryDfDepthData['Underwater Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else "%.3f" %float(x*100))
@@ -680,26 +693,87 @@ class TurtleData:
         temporaryDfDepthData['Layer 8 Percentage'] = temporaryDfDepthData['Layer 8 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else "%.3f" %float(x*100))
         temporaryDfDepthData['Layer 9 Percentage'] = temporaryDfDepthData['Layer 9 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else "%.3f" %float(x*100))
         temporaryDfDepthData['Layer 10 Percentage'] = temporaryDfDepthData['Layer 10 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else "%.3f" %float(x*100))
+        
+        # temporaryDfDepthData['Underwater Percentage'] = temporaryDfDepthData['Underwater Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 1 Percentage'] = temporaryDfDepthData['Layer 1 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 2 Percentage'] = temporaryDfDepthData['Layer 2 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 3 Percentage'] = temporaryDfDepthData['Layer 3 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 4 Percentage'] = temporaryDfDepthData['Layer 4 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 5 Percentage'] = temporaryDfDepthData['Layer 5 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 6 Percentage'] = temporaryDfDepthData['Layer 6 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 7 Percentage'] = temporaryDfDepthData['Layer 7 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 8 Percentage'] = temporaryDfDepthData['Layer 8 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 9 Percentage'] = temporaryDfDepthData['Layer 9 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
+        # temporaryDfDepthData['Layer 10 Percentage'] = temporaryDfDepthData['Layer 10 Percentage'].apply(lambda x: str(x).replace('%', '') if '%' in str(x) else str(x))
 
+        # temporaryDfDepthData['Underwater Percentage'] = temporaryDfDepthData['Underwater Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 1 Percentage'] = temporaryDfDepthData['Layer 1 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 2 Percentage'] = temporaryDfDepthData['Layer 2 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 3 Percentage'] = temporaryDfDepthData['Layer 3 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 4 Percentage'] = temporaryDfDepthData['Layer 4 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 5 Percentage'] = temporaryDfDepthData['Layer 5 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 6 Percentage'] = temporaryDfDepthData['Layer 6 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 7 Percentage'] = temporaryDfDepthData['Layer 7 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 8 Percentage'] = temporaryDfDepthData['Layer 8 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 9 Percentage'] = temporaryDfDepthData['Layer 9 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+        # temporaryDfDepthData['Layer 10 Percentage'] = temporaryDfDepthData['Layer 10 Percentage'].apply(lambda x: x.replace('%', '') if x.contains('%') else x)
+
+        # if any(temporaryDfDepthData['Underwater Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 1 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 2 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 3 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 4 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 5 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 6 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 7 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 8 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 9 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+        # if any(temporaryDfDepthData['Layer 10 Percentage'].astype('str').str.contains('%')):
+        #     str.replace('%','')
+
+
+        # temporaryDfDepthData['Underwater Percentage'] = temporaryDfDepthData['Underwater Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 1 Percentage'] = temporaryDfDepthData['Layer 1 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 2 Percentage'] = temporaryDfDepthData['Layer 2 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 3 Percentage'] = temporaryDfDepthData['Layer 3 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 4 Percentage'] = temporaryDfDepthData['Layer 4 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 5 Percentage'] = temporaryDfDepthData['Layer 5 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 6 Percentage'] = temporaryDfDepthData['Layer 6 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 7 Percentage'] = temporaryDfDepthData['Layer 7 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 8 Percentage'] = temporaryDfDepthData['Layer 8 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 9 Percentage'] = temporaryDfDepthData['Layer 9 Percentage'].str.replace('%','')
+        # temporaryDfDepthData['Layer 10 Percentage'] = temporaryDfDepthData['Layer 10 Percentage'].str.replace('%','')
+        
+        
         print(temporaryDfDepthData)
 
-        #Changing data type of multiple columns 
-        #df['Percent'] = df['Grade'].astype(str) + '%'
-
-        temporaryDfDepthData['Underwater Percentage'] = temporaryDfDepthData['Underwater Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 1 Percentage'] = temporaryDfDepthData['Layer 1 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 2 Percentage'] = temporaryDfDepthData['Layer 2 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 3 Percentage'] = temporaryDfDepthData['Layer 3 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 4 Percentage'] = temporaryDfDepthData['Layer 4 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 5 Percentage'] = temporaryDfDepthData['Layer 5 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 6 Percentage'] = temporaryDfDepthData['Layer 6 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 7 Percentage'] = temporaryDfDepthData['Layer 7 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 8 Percentage'] = temporaryDfDepthData['Layer 8 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 9 Percentage'] = temporaryDfDepthData['Layer 9 Percentage'].astype(str) + '%'
-        temporaryDfDepthData['Layer 10 Percentage'] = temporaryDfDepthData['Layer 10 Percentage'].astype(str) + '%'
-
-        print(temporaryDfDepthData.dtypes)
         
+        # temporaryDfDepthData = temporaryDfDepthData.astype({
+        #     'Underwater Percentage': 'float64',
+        #     'Layer 1 Percentage': 'float64',
+        #     'Layer 2 Percentage': 'float64',
+        #     'Layer 3 Percentage': 'float64',
+        #     'Layer 4 Percentage': 'float64',
+        #     'Layer 5 Percentage': 'float64',
+        #     'Layer 6 Percentage': 'float64',
+        #     'Layer 7 Percentage': 'float64',
+        #     'Layer 8 Percentage': 'float64',
+        #     'Layer 9 Percentage': 'float64',
+        #     'Layer 10 Percentage': 'float64'})
+
+        # print(temporaryDfDepthData.dtypes)
+
+
         #--------------------------
         print(f"Before cleaning, the depthDataDf called: {self.depthDataDfCsvName}, contained {len(temporaryDfDepthData.index)} rows")
         print('--------------')
@@ -746,6 +820,9 @@ class TurtleData:
         print(self.depthDataDf.dtypes) 
         print(' End of depthDataDf ^')
         print('--------------')
+
+        ## TO DO:
+        # CHANGE SOME COLUMN VALUES TO PERCENTAGE NUMBER BEFORE REMOVING THE DUPLICATED COLUMNS
     
     def generateDepthDataDfCsvName(self):
         # Last entry:
