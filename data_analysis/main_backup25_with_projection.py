@@ -81,11 +81,9 @@ def main():
 
     #
     # get plotlyLines from reliable gps
-    ### USE WITH JUPYTER NOTEBOOK
     getLines(turtlesData)
 
     # get plotlyLines from reliable gps with map projection
-    ### USE WITH JUPYTER NOTEBOOK
     getProjLines(turtlesData)
 
     # see the CRS

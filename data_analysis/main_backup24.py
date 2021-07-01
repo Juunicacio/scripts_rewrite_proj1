@@ -43,9 +43,6 @@ def main():
     # SAVE THE ALL CLEANED GPS DATAFRAME in the Results Folder
     checkIfAllCleanedGpsDfHasBeenSaved(turtlesData)
 
-    # Assign the CRS data
-    giveCoordinateReferenceSystemCrs(turtlesData)
-
     # see dfs of reliable gps and no reliable gps (Remove GPS Errors by Angular velocity/Rotational speed)
     getReliableAndNoReliableGpsDataframes(turtlesData)
 
@@ -81,15 +78,7 @@ def main():
 
     #
     # get plotlyLines from reliable gps
-    ### USE WITH JUPYTER NOTEBOOK
     getLines(turtlesData)
-
-    # get plotlyLines from reliable gps with map projection
-    ### USE WITH JUPYTER NOTEBOOK
-    getProjLines(turtlesData)
-
-    # see the CRS
-    askCrs(turtlesData)
 
 if __name__ == "__main__":
     main()

@@ -2,7 +2,7 @@ import pandas as pd
 import os
 #import pyproj as pj # for reliable gps
 # or from pyproj import Geod (and remove the pj when executing the functionality)
-from pyproj import Geod, Proj
+from pyproj import Geod
 import numpy as np # for reliable gps
 from collections import Counter # for reliable gps
 import datetime as dt # for reliable gps
@@ -195,9 +195,6 @@ class TurtleData:
         self.remainingDataDfCsvName = ""
         self.depthDataDf = pd.DataFrame()
         self.depthDataDfCsvName = ""
-        self.crs = ""
-        self.ellps = ""
-        self.proj4 = ""
 
     def addDataFromCsv(self, filename):
         temporaryDf = pd.read_csv(filename, skiprows=23, names=TurtleData.col_names)        
@@ -392,11 +389,6 @@ class TurtleData:
     def saveAllCleanedGpsDfData(self):
         return TurtleData.checkIfDfHasBeenSavedAndSaveDf(self.DATACLEANINGRESULTS_FOLDER_ITENS, self.DATACLEANINGRESULTS_FOLDER , self.allCleanedGpsDf, self.allCleanedGpsDfCsvName)
 
-    def assignCoordinateReferenceSystemCrs(self, crsEpsgCode, ellpsForGeod, proj4ForProj):
-        self.crs = crsEpsgCode
-        self.ellps = ellpsForGeod
-        self.proj4 = proj4ForProj
-
     def giveReliableGpsDfAndNoReliableGps(self):
         '''
         Remove GPS Errors by Angular velocity/Rotational speed 
@@ -408,7 +400,7 @@ class TurtleData:
         '''
         removingGpsErrorsTemporaryDf = self.allCleanedGpsDf.copy()
         #print(gpsErrorsTemporaryDf)
-        geod = Geod(ellps=self.ellps)
+        wgs84_geod = Geod(ellps='WGS84')
         ## Converting data to a NumPy array.        
         latitudes = removingGpsErrorsTemporaryDf[['GPS Latitude']].to_numpy() 
         longitudes = removingGpsErrorsTemporaryDf[['GPS Longitude']].to_numpy()
@@ -431,7 +423,7 @@ class TurtleData:
             D = 0
             S = 100
             while (S > 1.111) and (i < len(latitudes)):
-                D = TurtleData.calculateDistance(geod, longitudes[previous], latitudes[previous], longitudes[i], latitudes[i])
+                D = TurtleData.calculateDistance(wgs84_geod, longitudes[previous], latitudes[previous], longitudes[i], latitudes[i])
                 t1 = TurtleData.convertUnixTimeFromString(acquisitionTimes[previous,0])
                 t2 = TurtleData.convertUnixTimeFromString(acquisitionTimes[i,0])
                 S = TurtleData.calculateSpeed(D,t1,t2)
@@ -779,7 +771,7 @@ class TurtleData:
         # not working, because I could not install geopandas inside pipenv
     
     # create a plot of the track
-    def createLinesWithoutProjection(self, color):
+    def createLines(self, color):
         #This create all the points connected with lines!!
         ##It is this what I need to transform into shapefile
         i=0
@@ -788,39 +780,3 @@ class TurtleData:
             x2, y2 = self.reliableGpsDf['GPS Longitude'][i+1], self.reliableGpsDf['GPS Latitude'][i+1]
             plt.plot([x1, x2], [y1, y2], color=color, marker = 'o',markersize = 1)
             i+=1
-    
-    def convertCoordinatesIntoMapProjection(self, color):
-        '''
-        Converts from longitude,latitude to native map projection x,y coordinates
-        '''
-        #coordinatesColumnsArray = self.reliableGpsDf[['GPS Longitude', 'GPS Latitude']].to_numpy()
-        ##Put the Longitude values inside a numpy_array
-        xlon = self.reliableGpsDf['GPS Longitude'].to_numpy()
-        #print(type(xlon))
-        ##Put the Latitudes values inside a numpy_array
-        ylat = self.reliableGpsDf['GPS Latitude'].to_numpy()
-        #print(type(ylat))
-
-        ## initialize a Proj class instance
-        ## example:
-        ## p = Proj('+proj=utm +zone=10 +ellps=WGS84') # use proj4 string
-        ## x,y = p(-120.108, 34.36116666)
-        ##wgs84 = Proj('+proj=longlat +datum=WGS84 +no_defs') # http://epsg.io/4326
-        p = Proj(self.proj4)
-        x, y = p(xlon, ylat)
-
-        ## Create lines in projection
-        i=0
-        while(i < len(ylat)-1):
-            x1, y1 = p(xlon[i], ylat[i])
-            x2, y2 = p(xlon[i+1], ylat[i+1])
-            plt.plot([x1, x2], [y1, y2], color=color, marker = 'o',markersize = 1)
-            i+=1
-
-        ### gpsDataNumpyArray = self.reliableGpsDf.to_numpy()
-	    ### depthDataNumpyArray = self.depthDataDf.to_numpy()
-        
-    def viewTheCoordinateReferenceSystemCrsAssociated(self):
-        print("The CRS of this data is:", self.crs)
-    
-    # to do Create_Half_Time_Depth_Point

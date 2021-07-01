@@ -37,12 +37,6 @@ else:
     DATACLEANINGRESULTS_FOLDER = "dataCleaningResults"
     DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
 
-# Coordinate Reference Systems
-# http://epsg.io/4326
-crs = 'EPSG:4326'
-ellps = 'WGS84'
-proj4 = '+proj=longlat +datum=WGS84 +no_defs '
-
 TAG_TURTLE_1 = '710333a'
 DATE_TAG_TURTLE_1 = '2020.07.09'
 TIME_TAG_TURTLE_1 = '23:00:09'
@@ -216,10 +210,6 @@ def checkIfAllCleanedGpsDfHasBeenSaved(turtlesData):
     for turtleData in turtlesData:
         turtleData.saveAllCleanedGpsDfData()
 
-def giveCoordinateReferenceSystemCrs(turtlesData):
-    for turtleData in turtlesData:
-        turtleData.assignCoordinateReferenceSystemCrs(crs, ellps, proj4)
-
 def getReliableAndNoReliableGpsDataframes(turtlesData):
     for turtleData in turtlesData:
         turtleData.giveReliableGpsDfAndNoReliableGps()
@@ -270,24 +260,10 @@ def checkIfdepthDataDfHasBeenSaved(turtlesData):
 #
 def getLines(turtlesData):
     #for turtleData in turtlesData:
-        #turtleData.createLinesWithoutProjection()
+        #turtleData.createLines()
         # add color to points on plot
     for turtleData in turtlesData:
         if turtleData.getTag() == TAG_TURTLE_1:
-            turtleData.createLinesWithoutProjection('red')
+            turtleData.createLines('red')
         elif turtleData.getTag() == TAG_TURTLE_2:
-            turtleData.createLinesWithoutProjection('green')
-
-def getProjLines(turtlesData):
-    #for turtleData in turtlesData:
-        #turtleData.convertCoordinatesIntoMapProjection()
-        # add color to points on plot
-    for turtleData in turtlesData:
-        if turtleData.getTag() == TAG_TURTLE_1:
-            turtleData.convertCoordinatesIntoMapProjection('red')
-        elif turtleData.getTag() == TAG_TURTLE_2:
-            turtleData.convertCoordinatesIntoMapProjection('green')
-
-def askCrs(turtlesData):
-    for turtleData in turtlesData:
-        turtleData.viewTheCoordinateReferenceSystemCrsAssociated()
+            turtleData.createLines('green')

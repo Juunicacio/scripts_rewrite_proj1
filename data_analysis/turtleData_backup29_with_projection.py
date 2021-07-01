@@ -822,5 +822,3 @@ class TurtleData:
         
     def viewTheCoordinateReferenceSystemCrsAssociated(self):
         print("The CRS of this data is:", self.crs)
-    
-    # to do Create_Half_Time_Depth_Point
