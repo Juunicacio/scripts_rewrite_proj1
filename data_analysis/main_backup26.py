@@ -91,7 +91,7 @@ def main():
     # see the CRS
     askCrs(turtlesData)
 
-    #askArray(turtlesData) #just to see if the append arrays inside the empty object works
+    askArray(turtlesData)
 
 if __name__ == "__main__":
     main()

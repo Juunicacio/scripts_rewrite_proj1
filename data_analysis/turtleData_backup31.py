@@ -202,7 +202,6 @@ class TurtleData:
         self.xlon_np = np.array([])
         self.xlat_np = np.array([])
         self.acquisitionTime_np = np.array([])
-        self.depth_acquisitionTime_np = np.array([])
 
     def addDataFromCsv(self, filename):
         temporaryDf = pd.read_csv(filename, skiprows=23, names=TurtleData.col_names)        
@@ -798,20 +797,47 @@ class TurtleData:
         '''
         Converts from longitude,latitude to native map projection x,y coordinates
         '''
+        #coordinatesColumnsArray = self.reliableGpsDf[['GPS Longitude', 'GPS Latitude']].to_numpy()
         ##Put the Longitude values inside a numpy_array
         xlon = self.reliableGpsDf['GPS Longitude'].to_numpy()        
         ##Put the Latitudes values inside a numpy_array
-        ylat = self.reliableGpsDf['GPS Latitude'].to_numpy()
-        ##Put the Acquisition Time values inside a numpy_array     
+        ylat = self.reliableGpsDf['GPS Latitude'].to_numpy()        
         acTime = self.reliableGpsDf['Acquisition Time'].to_numpy()
+        
+        ## to compare with viewArrays(self) #just to see if the append arrays inside the empty object works
+        # #------
+        # print(f"THE XLON ARRAY WITHOUT PUT INSIDE THE OBJECT IS: {xlon}")
+        # print(type(xlon))
+        # print("Size of the array: ", xlon.size)
+        # print("Length of one array element in bytes: ", xlon.itemsize)
+        # print("Total bytes consumed by the elements of the array: ", xlon.nbytes)
+        # #------
+        # print(f"THE ylat ARRAY WITHOUT PUT INSIDE THE OBJECT IS: {ylat}")
+        # print(type(ylat))
+        # print("Size of the array: ", ylat.size)
+        # print("Length of one array element in bytes: ", ylat.itemsize)
+        # print("Total bytes consumed by the elements of the array: ", ylat.nbytes)
+        # #------
+        # print(f"THE XLON ARRAY WITHOUT PUT INSIDE THE OBJECT IS: {acTime}")
+        # print(type(acTime))
+        # print("Size of the array: ", acTime.size)
+        # print("Length of one array element in bytes: ", acTime.itemsize)
+        # print("Total bytes consumed by the elements of the array: ", acTime.nbytes)
 
         # passing array to the obj
+        #self.xlon_np = np.array([])
+        #self.xlat_np = np.array([])
+        #self.acquisitionTime_np = np.array([])
+        #example:
         self.xlon_np = np.append(self.xlon_np, xlon)
         self.xlat_np= np.append(self.xlat_np, ylat)
         self.acquisitionTime_np = np.append(self.acquisitionTime_np, acTime)
 
         ## initialize a Proj class instance
-        ## using a proj4 string
+        ## example:
+        ## p = Proj('+proj=utm +zone=10 +ellps=WGS84') # use proj4 string
+        ## x,y = p(-120.108, 34.36116666)
+        ##wgs84 = Proj('+proj=longlat +datum=WGS84 +no_defs') # http://epsg.io/4326
         p = Proj(self.proj4)
         x, y = p(xlon, ylat)
         ## Create lines in projection
@@ -821,7 +847,6 @@ class TurtleData:
             x2, y2 = x[i+1], y[i+1]
             plt.plot([x1, x2], [y1, y2], color=color, marker = 'o',markersize = 1)
             i+=1
-        # or
         # ## Create lines in projection
         # i=0
         # while(i < len(ylat)-1):
@@ -852,16 +877,12 @@ class TurtleData:
         print("Length of one array element in bytes: ", self.acquisitionTime_np.itemsize)
         print("Total bytes consumed by the elements of the array: ", self.acquisitionTime_np.nbytes)
     
-    def addDepth(self,depth):
-        # all approximated recorder depth position appending to the obj list
-        self.depths.append(depth)
-    
-    #def createHalfTimeDepthPoint(self):
-
-    #using numpy arrays from reliableGpsDF columns lat, lon and acqtime, for faster calculations: 
-    #self.xlon_np, self.xlat_np, self.acquisitionTime_np
-    
     # to do Create_Half_Time_Depth_Point
     # gdf and df to numpy
     ### gpsDataNumpyArray = self.reliableGpsDf.to_numpy()
     ### depthDataNumpyArray = self.depthDataDf.to_numpy()
+    # reliableGpsDF lat, lon and acquisition time into numpy array for faster calculations
+        #self.xlon_np = np.array([])
+        #self.xlat_np = np.array([])
+        #self.acquisitionTime_np = np.array([])
+    #def createHalfTimeDepthPoint(self):

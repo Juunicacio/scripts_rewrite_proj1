@@ -4,6 +4,22 @@ from turtleData import TurtleData
 import datetime as dt # to create csv names
 import sys
 
+# # To run with Debug:
+# DIRNAME = os.path.dirname(__file__)
+# ASSETS_FOLDER = os.path.join(DIRNAME, 'assets')
+# ##ASSETS_FOLDER_OBJ = "data_analysis\\assets"
+# ASSETS_FOLDER_ITENS = os.listdir(ASSETS_FOLDER)# ("data_analysis/assets")
+
+# DATACLEANINGRESULTS_FOLDER = os.path.join(DIRNAME, 'dataCleaningResults')
+# DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
+
+# # To run with terminal OR jupyter notebook:
+# #ASSETS_FOLDER = "assets"
+# #ASSETS_FOLDER_ITENS = os.listdir(ASSETS_FOLDER)# ("assets")
+
+# #DATACLEANINGRESULTS_FOLDER = "dataCleaningResults"
+# #DATACLEANINGRESULTS_FOLDER_ITENS = os.listdir(DATACLEANINGRESULTS_FOLDER)# ("data_analysis/dataCleaningResults")
+
 if not sys.gettrace()==None:
     # To run with Debug:
     DIRNAME = os.path.dirname(__file__)
