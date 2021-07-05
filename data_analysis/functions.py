@@ -279,3 +279,7 @@ def askCrs(turtlesData):
 def askArray(turtlesData):
     for turtleData in turtlesData:
         turtleData.viewArrays()
+
+def depthPointsFromAcquisitionTime(turtlesData):
+    for turtleData in turtlesData:
+        turtleData.createDepthPointFromGpsDataByAcquisitionTime()

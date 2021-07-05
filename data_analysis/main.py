@@ -93,6 +93,8 @@ def main():
 
     #askArray(turtlesData) #just to see if the append arrays inside the empty object works
 
+    depthPointsFromAcquisitionTime(turtlesData)
+
 if __name__ == "__main__":
     main()
 

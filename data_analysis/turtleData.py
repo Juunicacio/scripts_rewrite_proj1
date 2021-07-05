@@ -9,6 +9,10 @@ import datetime as dt # for reliable gps
 import sys
 #import geopandas as gpd # for geometry column for reliable gps # install first GDAL, then fiona and then geopandas
 import matplotlib.pyplot as plt #produces maps and diagrams
+from GPSInfo import GPSInfo
+from DepthInfo import DepthInfo
+from ColumnReferences import ColumnReferences
+
 
 class TurtleData:
     """Commom base class for all turtle's data """
@@ -202,7 +206,12 @@ class TurtleData:
         self.xlon_np = np.array([])
         self.xlat_np = np.array([])
         self.acquisitionTime_np = np.array([])
-        self.depth_acquisitionTime_np = np.array([])
+        self.acquisitionTimeDepthData_np = np.array([])
+        self.gps1 = None #initialized with None value
+        self.gps2 = None
+        self.depths = []
+        #self.GPSInfo = None
+        #self.DEPTHInfo = None
 
     def addDataFromCsv(self, filename):
         temporaryDf = pd.read_csv(filename, skiprows=23, names=TurtleData.col_names)        
@@ -798,17 +807,12 @@ class TurtleData:
         '''
         Converts from longitude,latitude to native map projection x,y coordinates
         '''
-        ##Put the Longitude values inside a numpy_array
+        ##Put the Longitude values into a numpy_array
         xlon = self.reliableGpsDf['GPS Longitude'].to_numpy()        
-        ##Put the Latitudes values inside a numpy_array
+        ##Put the Latitudes values into a numpy_array
         ylat = self.reliableGpsDf['GPS Latitude'].to_numpy()
-        ##Put the Acquisition Time values inside a numpy_array     
-        acTime = self.reliableGpsDf['Acquisition Time'].to_numpy()
-
-        # passing array to the obj
-        self.xlon_np = np.append(self.xlon_np, xlon)
-        self.xlat_np= np.append(self.xlat_np, ylat)
-        self.acquisitionTime_np = np.append(self.acquisitionTime_np, acTime)
+        ##Put the Acquisition Time values into a numpy_array     
+        acTime = self.reliableGpsDf['Acquisition Time'].to_numpy()        
 
         ## initialize a Proj class instance
         ## using a proj4 string
@@ -829,6 +833,11 @@ class TurtleData:
         #     x2, y2 = p(xlon[i+1], ylat[i+1])
         #     plt.plot([x1, x2], [y1, y2], color=color, marker = 'o',markersize = 1)
         #     i+=1
+
+        # passing array to the obj
+        self.xlon_np = np.append(self.xlon_np, xlon)
+        self.xlat_np= np.append(self.xlat_np, ylat)
+        self.acquisitionTime_np = np.append(self.acquisitionTime_np, acTime)
         
     def viewTheCoordinateReferenceSystemCrsAssociated(self):
         print("The CRS of this data is:", self.crs)
@@ -851,17 +860,59 @@ class TurtleData:
         print("Size of the array: ", self.acquisitionTime_np.size)
         print("Length of one array element in bytes: ", self.acquisitionTime_np.itemsize)
         print("Total bytes consumed by the elements of the array: ", self.acquisitionTime_np.nbytes)
-    
-    def addDepth(self,depth):
+
+#----------------------------------------------------------------- 
+    def remove(self):
+        ##Put the Acquisition Time of the self.depthDataDf values into a numpy_array
+        #self.acquisitionTimeDepthData_np = np.array([])
+        acTimeDepthData = self.depthDataDf['Acquisition Time'].to_numpy()        
+        self.acquisitionTimeDepthData_np = np.append(self.acquisitionTimeDepthData_np, acTimeDepthData)
         # all approximated recorder depth position appending to the obj list
+        #self.depths.append(depth)
+
+        #Calcolo Percentuale depth in base al tempo
+        unixTimeGPS1 = convertUnixTimeFromString(gps1.acquisitionStartTime)
+        unixTimeGPS2 = convertUnixTimeFromString(gps2.acquisitionStartTime)
+
+        i=0
+        while i < (len(self.xlon_np)-1):
+            lon1 = self.xlon_np[i]
+            lon2 = self.xlon_np[i+1]
+#-----------------------------------------------------------------
+    
+    def addDepth(self, depth):
         self.depths.append(depth)
     
-    #def createHalfTimeDepthPoint(self):
+    def createDepthPoint(self,x,y):
+        self.x = x
+        self.y = y
+        self.GPSInfo = None
+        self.DEPTHInfo = None
 
-    #using numpy arrays from reliableGpsDF columns lat, lon and acqtime, for faster calculations: 
-    #self.xlon_np, self.xlat_np, self.acquisitionTime_np
-    
-    # to do Create_Half_Time_Depth_Point
-    # gdf and df to numpy
-    ### gpsDataNumpyArray = self.reliableGpsDf.to_numpy()
-    ### depthDataNumpyArray = self.depthDataDf.to_numpy()
+    def createDepthPointFromGpsDataByAcquisitionTime(self):
+        #using numpy arrays from reliableGpsDF columns for faster calculations:
+        
+        # to do Create_Half_Time_Depth_Point
+        # gdf and df to numpy
+        gpsDataNumpyArray = self.reliableGpsDf.to_numpy()
+        depthDataNumpyArray = self.depthDataDf.to_numpy()
+
+        print(gpsDataNumpyArray)
+        print(depthDataNumpyArray)
+        print("---------------------------------------------")
+        print(gpsDataNumpyArray[0])
+        print(gpsDataNumpyArray[1])
+        print(gpsDataNumpyArray[2])
+        print(gpsDataNumpyArray[3])
+        print(gpsDataNumpyArray[4])
+        print(gpsDataNumpyArray[5])
+        #print(gpsDataNumpyArray[7, :]) # lon column # not works this way, print the id8
+        print("---------------------------------------------")
+        gpsRow1 = GPSInfo(gpsDataNumpyArray[0])
+        gpsRow2 = GPSInfo(gpsDataNumpyArray[1])
+        print(gpsRow1)
+        print(gpsRow2)
+        print(gpsRow1.acquisitionTime + " - LON:" + str(gpsRow1.longitude) + " - LAT:" + str(gpsRow1.latitude))
+        print(gpsRow2.acquisitionTime + " - LON:" + str(gpsRow2.longitude) + " - LAT:" + str(gpsRow2.latitude))
+
+        print("---------------------END------------------------")
